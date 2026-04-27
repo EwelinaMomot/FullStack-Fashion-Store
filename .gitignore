@@ -1,0 +1,15 @@
+# Visual Studio files
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.v12.suo
+
+# Node.js (dla klienta)
+node_modules/
+npm-debug.log*
+
+# System files
+.DS_Store
+Thumbs.db
