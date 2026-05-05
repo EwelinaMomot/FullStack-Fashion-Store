@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using server.Data;
+using server.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,5 +31,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapProductEndpoints();
+app.MapCategoryEndpoints();
 
 app.Run();
