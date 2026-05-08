@@ -69,5 +69,6 @@ app.MapProductEndpoints();
 app.MapCategoryEndpoints();
 app.MapCommentEndpoints();
 app.MapAuthorizationEndpoints();
+app.MapUserEndpoints();
 
 app.Run();
