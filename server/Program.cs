@@ -17,7 +17,20 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
+
 var app = builder.Build();
+app.UseCors("FrontendPolicy");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -33,5 +46,6 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapProductEndpoints();
 app.MapCategoryEndpoints();
+app.MapCommentEndpoints();
 
 app.Run();

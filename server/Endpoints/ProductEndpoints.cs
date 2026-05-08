@@ -10,16 +10,39 @@ namespace server.Endpoints
         {
             var group = app.MapGroup("/api/products");
 
-            // Pobieranie wszystkich produktów
-            group.MapGet("/", async (DataContext context) =>
+            // Pobieranie wszystkich produktów (nieusuniętych)
+            group.MapGet("/", async (DataContext context, int page =1,int pageSize=10) =>
             {
-                return await context.Products.Include(p => p.ProductCategory).ToListAsync();
+                if (page <= 0) page = 1;
+                if (pageSize <= 0) pageSize = 10;
+
+                int skip =(page-1)*pageSize;
+                int totalProductsNumber =await context.Products.CountAsync(p => !p.IsDeleted);
+
+                var products = await context.Products
+                    .Include(p => p.ProductCategory)
+                    .Include(p => p.Comments)
+                    .Where(p => !p.IsDeleted).Skip(skip).Take(pageSize)
+                    .ToListAsync();
+
+                return Results.Ok(new
+                {
+                    TotalProductsNumber = totalProductsNumber,
+                    CurrentPage = page,
+                    totalPages = (int)Math.Ceiling(totalProductsNumber / (double)pageSize),
+                    Products = products
+                });
             });
 
-            // Pobieranie produktu po ID
+            // Pobieranie produktu po ID (nieusunięte)
             group.MapGet("/{id}", async (int id, DataContext context) =>
             {
-                return await context.Products.FindAsync(id) is Product product
+                var product = await context.Products
+                    .Include(p => p.ProductCategory)
+                    .Include(p => p.Comments)
+                    .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted);
+
+                return product is not null
                     ? Results.Ok(product)
                     : Results.NotFound("Produkt nie istnieje.");
             });
@@ -30,6 +53,36 @@ namespace server.Endpoints
                 context.Products.Add(product);
                 await context.SaveChangesAsync();
                 return Results.Created($"/api/products/{product.Id}", product);
+            });
+
+            // Aktualizowanie produktu
+            group.MapPut("/{id}", async (int id, Product dto, DataContext context) =>
+            {
+                var product = await context.Products.FindAsync(id);
+                if (product is null || product.IsDeleted)
+                    return Results.NotFound("Produkt nie istnieje.");
+
+                // Aktualizuj dozwolone pola
+                product.Title = dto.Title;
+                product.Description = dto.Description;
+                product.ProductCategoryId = dto.ProductCategoryId;
+                product.ImageUrl = dto.ImageUrl;
+                // Nie nadpisujemy CreationDate ani CreatorUserId domyślnie
+
+                await context.SaveChangesAsync();
+                return Results.Ok(product);
+            });
+
+            // Soft-delete produktu
+            group.MapDelete("/{id}", async (int id, DataContext context) =>
+            {
+                var product = await context.Products.FindAsync(id);
+                if (product is null || product.IsDeleted)
+                    return Results.NotFound("Produkt nie istnieje.");
+
+                product.IsDeleted = true;
+                await context.SaveChangesAsync();
+                return Results.NoContent();
             });
         }
     }
