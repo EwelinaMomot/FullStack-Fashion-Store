@@ -33,7 +33,7 @@ namespace server.Endpoints
                 }
 
                 var products = await query
-                    .Include(p => p.ProductCategory)
+                    .Include(p => p.ProductCategories)
                     .Include(p => p.Comments)
                     .Where(p => !p.IsDeleted).Skip(skip).Take(pageSize)
                     .ToListAsync();
@@ -51,7 +51,7 @@ namespace server.Endpoints
             group.MapGet("/{id}", async (int id, DataContext context) =>
             {
                 var product = await context.Products
-                    .Include(p => p.ProductCategory)
+                    .Include(p => p.ProductCategories)
                     .Include(p => p.Comments)
                     .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted);
 

@@ -23,7 +23,7 @@ namespace server.Models
    
         public List<Comment> Comments { get; set; } = new List<Comment>();  
 
-        public ProductCategory ProductCategory { get; set; } = null!;
+        public List<ProductCategory> ProductCategories { get; set; } = new();
     }
 
 }
