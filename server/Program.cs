@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using server.Data;
 using server.Endpoints;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,7 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+//zezwala na publiczny dostêp do endpointów
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", builder =>
@@ -28,6 +31,18 @@ builder.Services.AddCors(options =>
     });
 });
 
+//u¿ywamy autentykaci
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+            builder.Configuration.GetSection("Token").Value!)),
+        ValidateIssuer = false,
+        ValidateAudience = false
+    };
+});
 
 var app = builder.Build();
 app.UseCors("FrontendPolicy");
@@ -47,5 +62,6 @@ app.MapControllers();
 app.MapProductEndpoints();
 app.MapCategoryEndpoints();
 app.MapCommentEndpoints();
+app.MapAuthorizationEndpoints();
 
 app.Run();
