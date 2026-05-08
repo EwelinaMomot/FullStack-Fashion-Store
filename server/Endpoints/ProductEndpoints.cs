@@ -11,7 +11,7 @@ namespace server.Endpoints
             var group = app.MapGroup("/api/products");
 
             // Pobieranie wszystkich produktów (nieusuniętych) z paginacją i wyszukiwaniem
-            group.MapGet("/", async (DataContext context, string? search= null, int page =1,int pageSize=10) =>
+            group.MapGet("/", async (DataContext context, string? search= null, int? categoryId=null, int page =1,int pageSize=10) =>
             {
                 if (page <= 0) page = 1;
                 if (pageSize <= 0) pageSize = 10;
@@ -25,6 +25,11 @@ namespace server.Endpoints
                 {
                     search = search.ToLower();
                     query = query.Where(p => p.Title.ToLower().Contains(search) || p.Description.ToLower().Contains(search));
+                }
+
+            if (categoryId is not null)
+                {                    
+                    query = query.Where(p => p.ProductCategoryId==categoryId.Value);
                 }
 
                 var products = await query
