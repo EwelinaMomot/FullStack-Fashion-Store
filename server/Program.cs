@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-//u¿ywamy autentykaci
+//u¿ywamy autentykacji
 builder.Services.AddAuthentication().AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters

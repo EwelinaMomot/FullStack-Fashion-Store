@@ -22,7 +22,8 @@ namespace server.Endpoints
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.UserRole.Name)
             };
 
             // 2. Pobieramy klucz z appsettings.json i zamieniamy go na format bajtowy
@@ -66,8 +67,10 @@ namespace server.Endpoints
                 var user = new User
                 {
                     Username = request.Username,
+                    RoleId = 1, //domyślna rola to zwykły user
                     PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(request.Password)),
                     PasswordSalt = hmac.Key
+
                 };
 
                 context.Users.Add(user);
@@ -78,7 +81,7 @@ namespace server.Endpoints
 
             group.MapPost("/login", async (DataContext context, UserDto request, IConfiguration configuration) =>
             {
-                var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+                var user = await context.Users.Include(u=>u.UserRole).FirstOrDefaultAsync(u => u.Username == request.Username);
 
                 if (user == null) { return Results.BadRequest("Użytkownik o podanym loginie nie istnieje"); }
 
