@@ -84,6 +84,7 @@ namespace server.Endpoints
             // Soft-delete produktu
             group.MapDelete("/{id}", async (int id, DataContext context) =>
             {
+
                 var product = await context.Products.FindAsync(id);
                 if (product is null || product.IsDeleted)
                     return Results.NotFound("Produkt nie istnieje.");
@@ -91,7 +92,7 @@ namespace server.Endpoints
                 product.IsDeleted = true;
                 await context.SaveChangesAsync();
                 return Results.NoContent();
-            });
+            }).RequireAuthorization(policy=>policy.RequireRole("Admin"));// Jeśli ktoś ma w tokenie "User", serwer z automatu wyrzuci 403 Forbidden
         }
     }
 }

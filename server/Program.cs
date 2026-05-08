@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using server.Data;
 using server.Endpoints;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,9 +41,13 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
             builder.Configuration.GetSection("Token").Value!)),
         ValidateIssuer = false,
-        ValidateAudience = false
+        ValidateAudience = false,
+        //mapowanie roli do autoryzacji
+        RoleClaimType = ClaimTypes.Role
     };
 });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 app.UseCors("FrontendPolicy");
@@ -56,6 +61,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
