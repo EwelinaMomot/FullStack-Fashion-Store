@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using server.Data;
+using server.Models;
 
 namespace server.Endpoints
 {
@@ -52,7 +53,7 @@ namespace server.Endpoints
                 var comment = await context.Comments.FindAsync(id);
                 if (comment is null || comment.IsDeleted)
                     return Results.NotFound("Komentarz nie istnieje.");
-                comment.Content = dto.Content;
+                comment.Description = dto.Description;
                 await context.SaveChangesAsync();
                 return Results.Ok(comment);
             });
