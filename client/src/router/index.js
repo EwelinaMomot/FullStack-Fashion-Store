@@ -10,12 +10,18 @@ const routes = [
     component: HomeView,
   },
   {
+    path: '/',
+    component: HomeView,
+  },
+  {
     path: '/cart',
     component: CartView,
   },
   {
     path: '/product/:productId',
     component: SingleProductView,
+    name: 'product-detail',
+    props: true,
   },
 ]
 
