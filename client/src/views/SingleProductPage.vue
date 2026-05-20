@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { cartActions } from '@/store/cart'
+import Navbar from '@/components/navbar.vue'
 
 const props = defineProps({
   productId: {
@@ -17,6 +19,20 @@ const fetchProductData = async (id) => {
   console.log('product response:', response.data)
 }
 
+const handleAddToCart =(product)=>{
+  cartActions.addToCart(product)
+}
+
+const isVisible = ref(false)
+
+
+const showWithTimeout = () => {
+  isVisible.value = true
+
+  let timeout = null;
+  timeout = setTimeout(()=>{isVisible.value=false},3000)
+}
+
 onMounted(async () => {
   try {
     await fetchProductData(props.productId)
@@ -28,6 +44,7 @@ onMounted(async () => {
 
 <template>
   <div class="chrome-page-wrapper">
+    <Navbar />
     <div v-if="product" class="product-container">
       
       <div class="image-section">
@@ -56,32 +73,34 @@ onMounted(async () => {
         <div class="product-meta">
           <span class="meta-item">ID: {{ props.productId }}</span>
           <span v-if="product.creationDate" class="meta-item">
-            Added: {{ new Date(product.creationDate).toLocaleDateString() }}
+            Dodano: {{ new Date(product.creationDate).toLocaleDateString() }}
           </span>
         </div>
 
         <div class="divider-line"></div>
 
         <div class="description-container">
-          <h3 class="section-subtitle">Description</h3>
+          <h3 class="section-subtitle">Opis</h3>
           <p class="product-description">{{ product.description }}</p>
         </div>
 
         <div class="divider-line"></div>
 
         <div class="actions-container">
-          <button class="btn-chrome-primary">
-            <span class="btn-text">Add to Cart</span>
+          <button class="btn-chrome-primary" @click="handleAddToCart(product),showWithTimeout()">
+            <span class="btn-text">Dodaj do koszyka</span>
             <div class="btn-glow"></div>
           </button>
+          
         </div>
+        <span v-if="isVisible">Dodano do koszyka</span>
 
         <div class="admin-panel-box">
-          <h4 class="admin-title">Admin Management</h4>
-          <p class="admin-desc">As an administrator, you can permanently update or softly discard this item from the warehouse.</p>
+          <h4 class="admin-title">Panel administratora</h4>
+          <p class="admin-desc">Jako administrator możesz trwale zaktualizować lub usunąć ten produkt ze stanów magazynowych.</p>
           <div class="admin-actions">
-            <button class="btn-admin-edit">Edit Product</button>
-            <button class="btn-admin-delete">Delete Item</button>
+            <button class="btn-admin-edit">Edytuj produkt</button>
+            <button class="btn-admin-delete">Usuń produkt</button>
           </div>
         </div>
 
@@ -90,252 +109,227 @@ onMounted(async () => {
 
     <div v-else class="loading-state">
       <div class="chrome-spinner"></div>
-      <p>Retrieving metallic data...</p>
+      <p>Pobieranie danych...</p>
     </div>
   </div>
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
+
 
 .chrome-page-wrapper {
-  background-color: #ffffff;
-  color: #000000;
+  font-family: 'Outfit', sans-serif;
+  background: radial-gradient(circle at 50% 20%, #dcecfa 0%, #edf4fc 40%, #ffffff 100%);
   min-height: 100vh;
-  padding: 4rem 2rem;
-  font-family: 'Inter', 'Poppins', sans-serif;
+  color: #3c4043;
+  padding: 0 1.5rem 4rem;
   display: flex;
-  justify-content: center;
+  
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .product-container {
-  max-width: 1200px;
+  max-width: 1100px;
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
+  margin-top: 2rem;
 }
 
-@media (max-width: 768px) {
-  .product-container {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-}
-
-
-.image-section {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
 
 .chrome-card {
-  position: relative;
-  background: #f8f9fa;
-  border: 1px solid #e2e8f0;
-  border-radius: 0px; 
-  padding: 1rem;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
+  background: #ffffff;
+  border-radius: 32px;
   overflow: hidden;
-}
+  box-shadow: 0 10px 30px rgba(175, 205, 240, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
 
-
-.metallic-border-overlay {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  border: 1px solid transparent;
-  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0) 50%, #000 100%) border-box;
-  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: destination-out;
-  mask-composite: exclude;
-  opacity: 0.6;
-  pointer-events: none;
+  background: #f4f8fd; 
+  transition: transform 0.3s ease;
 }
 
 .product-image {
   width: 100%;
   height: auto;
-  object-fit: cover;
-  filter: grayscale(15%) contrast(105%);
-  transition: filter 0.3s ease;
-}
-
-.chrome-card:hover .product-image {
-  filter: grayscale(0%) contrast(100%);
+  border-radius: 16px;
+  object-fit: contain;
+  max-height: 600px;
 }
 
 
 .info-section {
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .categories-tags {
-  display: flex;
-  gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
+
 .category-badge {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  background: #000000;
-  color: #ffffff;
-  padding: 0.3rem 0.8rem;
-  font-weight: 700;
+  background: #e8f0fe;
+  color: #1a73e8;
+  padding: 0.4rem 1rem;
+  border-radius: 24px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .product-title {
   font-size: 2.5rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-weight: 500;
+  color: #202124;
   margin: 0 0 0.5rem 0;
-  color: #000000;
-  text-transform: uppercase;
+  line-height: 1.2;
 }
 
 .product-meta {
   display: flex;
   gap: 1.5rem;
-  font-size: 0.8rem;
-  color: #718096;
-  letter-spacing: 0.05em;
+  color: #5f6368;
+  font-size: 0.95rem;
+  font-weight: 300;
+  margin-bottom: 1.5rem;
 }
 
 .divider-line {
   height: 1px;
-  background: linear-gradient(90deg, #000000 0%, #e2e8f0 100%);
-  margin: 2rem 0;
-  opacity: 0.8;
+  background: rgba(160, 195, 235, 0.3);
+  width: 100%;
+  margin: 1.5rem 0;
 }
 
 .section-subtitle {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #718096;
-  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #202124;
+  margin-bottom: 0.75rem;
 }
 
 .product-description {
+  font-weight: 300;
+  color: #5f6368;
+  line-height: 1.6;
   font-size: 1rem;
-  line-height: 1.7;
-  color: #2d3748;
+  margin: 0;
+}
+
+.actions-container {
+  margin-top: 1rem;
 }
 
 
 .btn-chrome-primary {
-  position: relative;
-  background: linear-gradient(135deg, #111 0%, #333 100%);
-  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #3c4043;
   border: none;
-  padding: 1.2rem 3rem;
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
+  padding: 1rem 2.5rem;
+  border-radius: 40px;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
-  width: 100%;
-  max-width: 350px;
+  box-shadow: 0 8px 24px rgba(160, 195, 235, 0.4);
   transition: all 0.3s ease;
-  overflow: hidden;
+  width: auto;
 }
 
 .btn-chrome-primary:hover {
-  background: linear-gradient(135deg, #000 0%, #222 100%);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
-}
-
+  box-shadow: 0 12px 32px rgba(160, 195, 235, 0.6);
+  transform: translateY(-2px);
+  color: #1a73e8; }
 
 .admin-panel-box {
-  margin-top: auto;
-  background: #f8f9fa;
-  border-left: 3px solid #000000;
+  background: #ffffff;
+  border-radius: 24px;
   padding: 1.5rem;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.01);
+  box-shadow: 0 6px 20px rgba(175, 205, 240, 0.25);
+  margin-top: 3rem;
+  border: 1px solid rgba(160, 195, 235, 0.15);
 }
 
 .admin-title {
   margin: 0 0 0.5rem 0;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 700;
+  font-weight: 500;
+  color: #202124;
+  font-size: 1.1rem;
 }
 
 .admin-desc {
-  font-size: 0.8rem;
-  color: #718096;
-  margin-bottom: 1rem;
-  line-height: 1.4;
+  font-weight: 300;
+  color: #5f6368;
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
 }
 
 .admin-actions {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .btn-admin-edit, .btn-admin-delete {
-  background: transparent;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 700;
+  padding: 0.6rem 1.25rem;
+  border-radius: 24px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  border: none;
+  transition: background 0.2s ease;
 }
 
 .btn-admin-edit {
-  border: 1px solid #000000;
-  color: #000000;
+  background: #e8f0fe;
+  color: #1a73e8;
 }
 
 .btn-admin-edit:hover {
-  background: #000000;
-  color: #ffffff;
+  background: #d2e3fc;
 }
 
 .btn-admin-delete {
-  border: 1px solid #e53e3e;
-  color: #e53e3e;
+  background: #fce8e6;
+  color: #d93025;
 }
 
 .btn-admin-delete:hover {
-  background: #e53e3e;
-  color: #ffffff;
+  background: #fad2cf;
 }
 
-/* Loader */
+
 .loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 50vh;
-  color: #718096;
-  font-size: 0.9rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  text-align: center;
+  color: #5f6368;
+  font-weight: 300;
+  margin-top: 4rem;
+  font-size: 1.1rem;
 }
 
-.chrome-spinner {
-  width: 40px;
-  height: 40px;
-  border: 2px solid #e2e8f0;
-  border-top: 2px solid #000000;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+@media (max-width: 900px) {
+  .product-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .product-title {
+    font-size: 2rem;
+  }
 }
 </style>

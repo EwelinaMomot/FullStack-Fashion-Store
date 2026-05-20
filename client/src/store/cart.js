@@ -19,6 +19,10 @@ export const totalPrice= computed(()=>{
     return cartState.items.reduce((total,item)=>total+item.price *item.quantity,0)
 })
 
+export const totalItemsCount=computed(()=>{
+    return cartState.items.reduce((total,item)=>total+item.quantity,0)
+})
+
 export const cartActions={
     clearCart() {
     cartState.items = []
@@ -33,10 +37,12 @@ export const cartActions={
         else{
             cartState.items.push({...product,quantity:1})
         }
+        console.log("Dodano produkt do koszyka :",product)
     },
 
     removeFromCart(productId){
         cartState.items=cartState.items.filter(item=>item.id !==productId)
+        console.log("Usunięto z koszyka :",productId)
     },
 
     increaseQuantity(productId){

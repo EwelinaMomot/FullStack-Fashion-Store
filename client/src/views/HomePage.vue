@@ -2,6 +2,8 @@
 import { ref,onMounted } from 'vue'
 import axios from 'axios'
 import { RouterLink } from 'vue-router'
+import { cartActions } from '@/store/cart'
+import Navbar from '@/components/navbar.vue'
 
 const products = ref([])
 
@@ -22,11 +24,12 @@ onMounted(() => {
 
   <template>
     <div class="home-root">
+      <Navbar />
       <header class="hero">
         <div class="hero-inner">
           <h2 class="brand">Fashion Store</h2>
-          <p class="tagline">Brand for You</p>
-          <a class="cta" href="#products">Zobacz kolekcję</a>
+          <p class="tagline">Zapraszamy</p>
+          <a class="cta" href="#products">Zobacz moją kolekcję</a>
         </div>
       </header>
 
@@ -54,7 +57,7 @@ onMounted(() => {
                 <p class="product-desc">{{ product.description }}</p>
                 <div class="card-footer">
                   <span class="price">{{ product.price ? product.price + ' zł' : '' }}</span>
-                  <button class="buy" @click.stop="addToCart(product)">Do koszyka</button>
+                  <button class="buy" @click.stop="cartActions.addToCart(product)">Do koszyka</button>
                 </div>
               </div>
               <div class="silver-edge"></div>
@@ -67,245 +70,178 @@ onMounted(() => {
 
 
   <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
 
-  :root {
-    --bg: #101214;
-    --surface: #181b1f;
-    --surface-light: #242a30;
-    --fg: #f4f4f4;
-    --muted: #a3a8ae;
-    --accent: #b8bbc0;
-    --chrome: linear-gradient(135deg, #20252b 0%, #4c525a 25%, #d7d8db 50%, #4c525a 75%, #1a1d21 100%);
-  }
+.home-root {
 
-  .home-root {
-    min-height: 100vh;
-    background: radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 28%),
-      linear-gradient(180deg, #0c0f12 0%, #14181d 52%, #101214 100%);
-    color: var(--fg);
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  }
-
-  .hero {
-    background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.12), transparent 24%),
-      linear-gradient(180deg, #111418 0%, #161b20 100%);
-    color: #f9fafb;
-    padding: 56px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: inset 0 0 60px rgba(255,255,255,0.04);
-  }
-
-  .hero-inner {
-    max-width: 1100px;
-    text-align: left;
-  }
-
-  .brand {
-    font-size: 48px;
-    margin: 0 0 8px 0;
-    font-weight: 700;
-    letter-spacing: 1px;
-  }
-
-  .tagline {
-    margin: 0 0 18px 0;
-    color: #d6d6d6;
-  }
-
-  .cta {
-    display: inline-block;
-    padding: 12px 22px;
-    color: #f4f4f4;
-    text-decoration: none;
-    border-radius: 999px;
-    font-weight: 600;
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(135deg, #3e434a 0%, #51575f 20%, #9ba0a6 38%, #5b6067 68%, #23272d 100%);
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 4px 18px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .cta::before {
-    content: '';
-    position: absolute;
-    top: -20%;
-    left: -30%;
-    width: 45%;
-    height: 170%;
-    background: rgba(255,255,255,0.2);
-    transform: rotate(25deg);
-    transition: transform 0.55s ease;
-    filter: blur(4px);
-  }
-
-  .cta:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.13);
-  }
-
-  .cta:hover::before {
-    transform: translateX(110%) rotate(25deg);
-  }
-
-  .cta:active { transform: translateY(1px); }
-
-  .container {
-    max-width: 1100px;
-    margin: -40px auto 80px;
-    padding: 0 20px;
-  }
-
-  .products-section {
-    background: linear-gradient(180deg, rgba(30,33,38,0.95), rgba(22,25,30,0.98));
-    border: 1px solid rgba(255,255,255,0.06);
-    padding: 30px;
-    border-radius: 24px;
-    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
-  }
-
-  .section-title {
-    margin: 0 0 16px 8px;
-    font-size: 20px;
-    color: #e7e9eb;
-  }
-
-  .loading {
-    color: var(--muted);
-    padding: 20px 8px;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 18px;
-  }
-
-  .card {
-  display: flex;
-  flex-direction: column;
-  text-decoration: none; 
-  color: inherit;        
-
-  position: relative;
-  background: radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 32%),
-    linear-gradient(180deg, #181b1f 0%, #1f242a 100%);
-  border: 1px solid rgba(255,255,255,0.08);
-  overflow: hidden;
-  border-radius: 28px 8px 28px 8px;
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
-  padding-bottom: 10px;
+  font-family: 'Outfit', sans-serif;
+  /* Rozmyty, jasnoniebieski gradient w tle */
+  background: radial-gradient(circle at 50% 20%, #dcecfa 0%, #edf4fc 40%, #ffffff 100%);
+  min-height: 100vh;
+  color: #3c4043;
+  padding-bottom: 4rem;
 }
 
-  .card:hover {
-    transform: translateY(-6px) scale(1.01);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-  }
+.hero {
+  text-align: center;
+  padding: 8rem 1rem 4rem;
+}
 
-  .card-media {
-    height: 170px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(180deg, #1b1e22 0%, #22272e 100%);
-  }
+.brand {
+  font-size: 2.5rem;
+  font-weight: 300; 
+  color: #202124;
+  margin-bottom: 0.5rem;
+}
 
-  .card-media img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: cover;
-    display: block;
-    border-radius: 16px;
-  }
+.tagline {
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: #5f6368;
+  margin-bottom: 2.5rem;
+}
 
-  .placeholder {
-    color: #7a7e85;
-    font-size: 14px;
-  }
+.cta {
+  display: inline-block;
+  text-decoration: none;
+  background: #ffffff;
+  color: #3c4043;
+  padding: 1rem 2.5rem;
+  border-radius: 40px; 
+  font-size: 1rem;
+  font-weight: 500;
 
-  .card-body {
-    padding: 14px 16px 10px 16px;
-  }
+  box-shadow: 0 8px 24px rgba(160, 195, 235, 0.4); 
+  transition: all 0.3s ease;
+}
 
-  .product-title {
-    margin: 0 0 8px 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: #f4f4f4;
-  }
+.cta:hover {
+  box-shadow: 0 12px 32px rgba(160, 195, 235, 0.6);
+  transform: translateY(-2px);
+}
 
-  .product-desc {
-    margin: 0 0 14px 0;
-    color: #9fa5ab;
-    font-size: 13px;
-    min-height: 36px;
-  }
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
 
-  .card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 400;
+  margin-bottom: 2.5rem;
+  text-align: center;
+  color: #202124;
+}
 
-  .price {
-    color: #f4f4f4;
-    font-weight: 700;
-  }
+.loading {
+  text-align: center;
+  color: #5f6368;
+  font-weight: 300;
+}
 
-  .buy {
-    background: linear-gradient(135deg, #45484d 0%, #606569 20%, #9da1a7 45%, #5c6167 75%, #2b2f34 100%);
-    border: 1px solid rgba(255,255,255,0.12);
-    color: #f4f4f4;
-    padding: 8px 12px;
-    border-radius: 999px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 5px 14px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-  }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2.5rem;
+}
 
-  .buy::after {
-    content: '';
-    position: absolute;
-    top: -40%;
-    left: -30%;
-    width: 40%;
-    height: 200%;
-    background: rgba(255,255,255,0.18);
-    transform: rotate(25deg);
-    transition: transform 0.35s ease;
-  }
+.card {
+  background: #ffffff;
+  border-radius: 32px; 
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
 
-  .buy:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
-  }
+  box-shadow: 0 10px 30px rgba(175, 205, 240, 0.35);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
 
-  .buy:hover::after { transform: translateX(80%) rotate(25deg); }
+.card:hover {
+  box-shadow: 0 16px 40px rgba(175, 205, 240, 0.55);
+  transform: translateY(-4px);
+}
 
-  .buy:active { transform: translateY(1px); }
+.card-media {
+  height: 220px;
+  background: #f4f8fd; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .silver-edge {
-    position: absolute;
-    right: -40px;
-    top: 10px;
-    width: 80px;
-    height: 20px;
-    transform: rotate(18deg);
-    background: linear-gradient(90deg, rgba(214,214,214,1), rgba(170,175,183,0.95), rgba(220,220,220,0.98));
-    opacity: 0.95;
-    filter: blur(0.2px);
-    border-radius: 50%;
-  }
+.card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-  @media (max-width: 640px) {
-    .hero-inner { text-align: center }
-    .brand { font-size: 34px }
-    .container { margin-top: 10px }
-    .card { border-radius: 20px }
-  }
-  </style>
+.placeholder {
+  color: #a1c2fa;
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+.card-body {
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.product-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+  color: #202124;
+}
+
+.product-desc {
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: #5f6368;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  flex-grow: 1;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #202124;
+}
+
+.buy {
+  background: #e8f0fe; 
+  color: #1a73e8; 
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 24px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.buy:hover {
+  background: #d2e3fc;
+}
+
+.silver-edge {
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(160, 195, 235, 0.3), transparent);
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}
+</style>

@@ -1,8 +1,8 @@
 <script setup>
 import { cartActions, cartState, totalPrice } from '@/store/cart';
-import { ref,onMounted,computed } from 'vue'
-import {cartActions,cartState,totalPrice} from '../store/cart'
-import { it } from 'vue-router/dist/index-BzEKChPW.js';
+import { computed } from 'vue'
+import Navbar from '@/components/navbar.vue'
+
 //lokalna referencja
 const cartItems = computed(()=>cartState.items)
 const cartTotal = computed(()=>totalPrice.value)
@@ -12,7 +12,7 @@ const decreaseQuantity = (item) => cartActions.decreaseQuantity(item.id)
 const removeFromCart = (id) => cartActions.removeFromCart(id)
 
 const proceedToCheckout = () => {
-  alert(`Proceeding to checkout. Total amount to pay: ${cartTotal.value} zł`)
+  alert(`Przejście do kasy. Do zapłaty: ${cartTotal.value} zł`)
   // TODO
 }
 
@@ -20,10 +20,11 @@ const proceedToCheckout = () => {
 
 <template>
   <div class="cart-page-wrapper">
+    <Navbar />
     <div class="cart-container">
       <header class="cart-header">
-        <h1 class="page-title">Shopping Bag <span class="item-count">({{ cartItems.length }})</span></h1>
-        <RouterLink to="/" class="back-shopping">← Continue Shopping</RouterLink>
+        <h1 class="page-title">Koszyk <span class="item-count">({{ cartItems.length }})</span></h1>
+        
       </header>
 
       <div v-if="cartItems.length > 0" class="cart-content-layout">
@@ -33,14 +34,14 @@ const proceedToCheckout = () => {
             
             <div class="item-media">
               <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.title" />
-              <div v-else class="placeholder">No Image</div>
+              <div v-else class="placeholder">Brak zdjęcia</div>
               <div class="silver-edge-vertical"></div>
             </div>
 
             <div class="item-details">
               <div class="item-header">
                 <h4 class="item-title">{{ item.title }}</h4>
-                <button @click="removeFromCart(item.id)" class="btn-remove" title="Remove item">
+                <button @click="removeFromCart(item.id)" class="btn-remove" title="Usuń produkt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
               </div>
@@ -64,33 +65,30 @@ const proceedToCheckout = () => {
 
         <aside class="cart-summary-sidebar">
           <div class="summary-card">
-            <h3 class="summary-title">Summary</h3>
+            <h3 class="summary-title">Podsumowanie</h3>
             
             <div class="summary-row">
-              <span>Subtotal</span>
+              <span>Suma częściowa</span>
               <span>{{ cartTotal }} zł</span>
             </div>
             <div class="summary-row">
-              <span>Shipping</span>
-              <span class="shipping-free">FREE</span>
+              <span>Dostawa</span>
+              <span class="shipping-free">DARMOWA</span>
             </div>
 
             <div class="summary-divider"></div>
 
             <div class="summary-row total-row">
-              <span>Total (incl. VAT)</span>
+              <span>Razem </span>
               <span class="final-price">{{ cartTotal }} zł</span>
             </div>
 
             <button @click="proceedToCheckout" class="btn-checkout">
-              <span>Proceed to Checkout</span>
+              <span>Przejdź do kasy</span>
               <div class="btn-glow"></div>
             </button>
             
-            <div class="secure-badge">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              Secure SSL Encrypted Checkout
-            </div>
+          
           </div>
         </aside>
 
@@ -101,9 +99,9 @@ const proceedToCheckout = () => {
           <div class="chrome-ring"></div>
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="bag-icon"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
         </div>
-        <h2>Your bag is empty</h2>
-        <p>Items you add to your shopping bag will appear here.</p>
-        <RouterLink to="/" class="btn-back-home">Explore Collection</RouterLink>
+        <h2>Twój koszyk jest pusty</h2>
+        <p>Produkty dodane do koszyka pojawią się tutaj.</p>
+        <RouterLink to="/" class="btn-back-home">Przeglądaj kolekcję</RouterLink>
       </div>
 
     </div>
@@ -111,69 +109,64 @@ const proceedToCheckout = () => {
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
 
 .cart-page-wrapper {
-  background-color: #0d0f12; 
-  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  background: radial-gradient(circle at 50% 20%, #dcecfa 0%, #edf4fc 40%, #ffffff 100%);
   min-height: 100vh;
-  padding: 4rem 2rem;
-  font-family: 'Inter', sans-serif;
+  color: #3c4043;
+  padding: 0rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .cart-container {
   max-width: 1200px;
-  margin: 0 auto;
   width: 100%;
 }
-
 
 .cart-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding-bottom: 1.5rem;
+  align-items: center;
   margin-bottom: 3rem;
 }
 
 .page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
+  font-size: 2.25rem;
+  font-weight: 500;
+  color: #202124;
   margin: 0;
 }
 
 .item-count {
-  color: #7a7e85;
-  font-weight: 400;
+  font-weight: 300;
+  color: #5f6368;
+  font-size: 1.5rem;
 }
 
 .back-shopping {
-  color: #a0aec0;
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.2s ease;
-  letter-spacing: 0.05em;
+  color: #1a73e8;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
 }
 
 .back-shopping:hover {
-  color: #ffffff;
+  background-color: #e8f0fe;
 }
-
 
 .cart-content-layout {
   display: grid;
   grid-template-columns: 1fr 380px;
   gap: 3rem;
-  align-items: flex-start;
-}
-
-@media (max-width: 968px) {
-  .cart-content-layout {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
+  align-items: start;
 }
 
 
@@ -184,85 +177,85 @@ const proceedToCheckout = () => {
 }
 
 .cart-item-card {
-  position: relative;
-  background: linear-gradient(180deg, #181b1f 0%, #121418 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px 4px 16px 4px; 
-  padding: 1.5rem;
   display: flex;
-  gap: 1.5rem;
-  overflow: hidden;
+  background: #ffffff;
+  border-radius: 32px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(201, 222, 250, 0.5);
+  transition: box-shadow 0.3s ease;
 }
 
+.cart-item-card:hover {
+  box-shadow: 0 6px 30px rgba(201, 222, 250, 0.7);
+}
 
 .item-media {
-  position: relative;
-  width: 120px;
-  height: 140px;
-  background: #1b1e22;
+  flex: 0 0 120px;
+  height: 120px;
+  background: #f4f8fd;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  border-radius: 8px;
   overflow: hidden;
+  margin-right: 1.5rem;
 }
 
 .item-media img {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
-.silver-edge-vertical {
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 1px;
-  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.3), transparent);
+.placeholder {
+  color: #a1c2fa;
+  font-size: 0.85rem;
 }
 
-
 .item-details {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
+  justify-content: space-between;
 }
 
 .item-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.5rem;
 }
 
 .item-title {
-  font-size: 1.15rem;
-  font-weight: 600;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #202124;
+  margin: 0 0 0.25rem 0;
 }
 
 .btn-remove {
-  background: transparent;
+  background: #fce8e6;
+  color: #d93025;
   border: none;
-  color: #5a5e65;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: color 0.2s ease;
-  padding: 0;
+  transition: background-color 0.2s ease;
 }
 
 .btn-remove:hover {
-  color: #e53e3e;
+  background: #fad2cf;
 }
 
 .item-desc {
-  color: #7a7e85;
-  font-size: 0.88rem;
-  line-height: 1.4;
-  margin: 0 0 auto 0;
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: #5f6368;
+  margin: 0 0 1rem 0;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -271,49 +264,53 @@ const proceedToCheckout = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 1rem;
+  margin-top: auto;
 }
-
 
 .quantity-selector {
   display: flex;
   align-items: center;
-  background: #0d0f12;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  background: #f1f3f4;
+  border-radius: 9999px;
+  padding: 0.25rem;
 }
 
 .qty-btn {
   background: transparent;
   border: none;
-  color: #ffffff;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  color: #3c4043;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
 }
 
 .qty-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.05);
+  background: #e8eaed;
 }
 
 .qty-btn:disabled {
-  color: #3a3e45;
+  color: #bdc1c6;
   cursor: not-allowed;
 }
 
 .qty-value {
-  padding: 0 10px;
-  font-size: 0.9rem;
+  padding: 0 0.75rem;
+  font-weight: 500;
+  font-size: 0.95rem;
   min-width: 20px;
   text-align: center;
 }
 
 .price-total {
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #202124;
 }
 
 
@@ -323,74 +320,74 @@ const proceedToCheckout = () => {
 }
 
 .summary-card {
-  background: linear-gradient(180deg, #181b1f 0%, #121418 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px 4px 16px 4px;
+  background: #ffffff;
+  border-radius: 32px;
   padding: 2rem;
+  box-shadow: 0 4px 20px rgba(201, 222, 250, 0.5);
 }
 
 .summary-title {
-  font-size: 1.3rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #202124;
+  margin: 0 0 1.5rem 0;
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.95rem;
-  color: #a0aec0;
+  color: #5f6368;
   margin-bottom: 1rem;
+  font-size: 1rem;
 }
 
 .shipping-free {
-  color: #48bb78;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  color: #1e8e3e; 
+  font-weight: 500;
 }
 
 .summary-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(160, 195, 235, 0.3);
   margin: 1.5rem 0;
 }
 
 .total-row {
-  color: #ffffff;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  color: #202124;
+  font-weight: 500;
   margin-bottom: 2rem;
+  align-items: center;
 }
 
 .final-price {
-  font-size: 1.4rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
-
 .btn-checkout {
-  position: relative;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #ffffff;
-  color: #000000;
-  border: none;
-  padding: 1.1rem;
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+  color: #3c4043;
+  border: 1px solid #c9defa;
+  padding: 1rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
-  border-radius: 4px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(161, 194, 250, 0.4);
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
 }
 
 .btn-checkout:hover {
+  box-shadow: 0 8px 25px rgba(161, 194, 250, 0.6);
+  color: #1a73e8;
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1);
 }
 
 .secure-badge {
@@ -398,11 +395,8 @@ const proceedToCheckout = () => {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-size: 0.75rem;
-  color: #5a5e65;
-  margin-top: 1.2rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: #5f6368;
+  font-size: 0.85rem;
 }
 
 
@@ -416,50 +410,52 @@ const proceedToCheckout = () => {
 }
 
 .empty-icon-box {
-  position: relative;
+  background: #f4f8fd;
+  color: #a1c2fa;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.empty-title {
+  font-size: 2rem;
+  font-weight: 500;
+  color: #202124;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-desc {
+  color: #5f6368;
+  font-weight: 300;
+  font-size: 1.1rem;
   margin-bottom: 2rem;
 }
 
-.chrome-ring {
-  position: absolute;
-  top: -10px; left: -10px; right: -10px; bottom: -10px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 70%);
-}
-
-.bag-icon {
-  color: #3a3e45;
-}
-
-.empty-cart-state h2 {
-  font-size: 1.75rem;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.empty-cart-state p {
-  color: #7a7e85;
-  margin-bottom: 2.5rem;
-}
-
 .btn-back-home {
-  display: inline-block;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #ffffff;
-  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #3c4043;
+  border: none;
   padding: 1rem 2.5rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  transition: background 0.2s, border 0.2s;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(160, 195, 235, 0.4);
+  transition: all 0.3s ease;
 }
 
 .btn-back-home:hover {
-  background: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
+  box-shadow: 0 12px 32px rgba(160, 195, 235, 0.6);
+  color: #1a73e8;
+  transform: translateY(-2px);
 }
+
+
 </style>
