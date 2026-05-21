@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
+import Navbar from '@/components/navbar.vue'
 
 
 const users = ref([
@@ -12,15 +13,21 @@ const fetchUsers= async ()=>{
     console.log("users from backend",users)
 }
 const selectedUserId = ref('')
-const selectedRole = ref('')
+const selectedRoleId = ref('')
 
-const handleRoleChange = () => {
-  if (!selectedUserId.value || !selectedRole.value) {
+const  handleRoleChange = async() => {
+  if (!selectedUserId.value || !selectedRoleId.value) {
     alert('Wybierz użytkownika i nową rolę.')
     return
   }
-  //TODO
-  console.log(`Zaktualizowano uprawnienia użytkownika ID: ${selectedUserId.value} na rolę: ${selectedRole.value}`)
+  const changeUserRoleDTO=new{selectedUserId,selectedRoleId}
+  try{
+  const request = await axios.put("https://localhost:7154/api/users/${//TODO mojeid}/role",changeUserRoleDTO)
+  
+  console.log(request.data.message)
+  }catch (e){
+    console.log("błąd serwera przy aktualizacji roli:",e)
+  }
 }
 
 
@@ -31,15 +38,15 @@ const newProduct = ref({
   creatorUserId: ''
 })
 
-const handleAddProduct = () => {
+const handleAddProduct = async() => {
   if (!newProduct.value.title) {
     alert('Tytuł produktu jest wymagany!')
     return
   }
   // TODO newProduct.creatorUserId=
-  //TODO
+  try{
+  const request = await axios.post("https://localhost:7154/api/products",newProduct)
   alert(`Dodano produkt: ${newProduct.value.title}`)
-  
   // Czyszczenie formularza
   newProduct.value = {
     title: '',
@@ -47,11 +54,14 @@ const handleAddProduct = () => {
     imageUrl: '',
     creatorUserId: ''
   }
+  }catch(e){alert("Błąd serwera przy dodawaniu produktu")}
+  
 }
 </script>
 
 <template>
   <div class="admin-page-wrapper">
+    <Navbar />
     <div class="admin-container">
       
       <header class="admin-header">
@@ -82,10 +92,10 @@ const handleAddProduct = () => {
           <div class="form-group">
             <label for="role-select" class="form-label">Zmień uprawnienia</label>
             <div class="select-wrapper">
-              <select id="role-select" v-model="selectedRole" class="chrome-input">
+              <select id="role-select" v-model="selectedRoleId" class="chrome-input">
                 <option disabled value="">Wybierz rolę</option>
-                <option value="user">Zwykły użytkownik (User)</option>
-                <option value="admin">Administrator (Admin)</option>
+                <option value=2>Zwykły użytkownik (User)</option>
+                <option value=1>Administrator (Admin)</option>
               </select>
             </div>
           </div>
@@ -140,7 +150,9 @@ const handleAddProduct = () => {
   color: #3c4043;
   padding: 4rem 1.5rem;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
+  flex-direction: column;
+  align-items: center;
 }
 
 .admin-container {
@@ -181,6 +193,7 @@ const handleAddProduct = () => {
   box-shadow: 0 6px 25px rgba(175, 205, 240, 0.35);
   display: flex;
   flex-direction: column;
+  
   height: 100%;
 }
 
@@ -242,6 +255,7 @@ const handleAddProduct = () => {
   border-radius: 24px; 
   transition: all 0.2s ease;
   appearance: none; 
+  
 }
 
 .chrome-input:hover {

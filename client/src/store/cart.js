@@ -54,10 +54,11 @@ export const cartActions={
 
     decreaseQuantity(productId){
         const item = cartState.items.find(item=>item.id==productId)
+        console.log(item.quantity)
         if (item && item.quantity>1){
             item.quantity--
         }
-        if (item && item.quantity==1){
+        else if  (item && item.quantity==1){
             cartActions.removeFromCart(productId)
         }
     },

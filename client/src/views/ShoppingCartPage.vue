@@ -50,7 +50,7 @@ const proceedToCheckout = () => {
 
               <div class="item-footer">
                 <div class="quantity-selector">
-                  <button @click="decreaseQuantity(item)" class="qty-btn" :disabled="item.quantity <= 1">-</button>
+                  <button @click="decreaseQuantity(item)" class="qty-btn" :disabled="item.quantity <= 0">-</button>
                   <span class="qty-value">{{ item.quantity || 1 }}</span>
                   <button @click="increaseQuantity(item)" class="qty-btn">+</button>
                 </div>
