@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using server.Data;
 using server.Models;
 
@@ -37,7 +38,7 @@ namespace server.Endpoints
                     .Include(p => p.Comments)
                     .Where(p => !p.IsDeleted).Skip(skip).Take(pageSize)
                     .ToListAsync();
-
+                
                 return Results.Ok(new
                 {
                     TotalProductsNumber = totalProductsNumber,
