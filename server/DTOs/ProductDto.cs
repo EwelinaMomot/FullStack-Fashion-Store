@@ -8,8 +8,6 @@
         public string ImageUrl { get; set; }
         public DateTime CreationDate { get; set; }
 
-        public bool IsDeleted { get; set; }
-
         public int CreatorUserId {get;set;}
 
         public List<int> Categories { get; set; } = new();
