@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore.Query;
 using server.Data;
 using server.Models;
+using server.DTOs;
+using server.Mappers;
 
 namespace server.Endpoints
 {
@@ -28,23 +30,25 @@ namespace server.Endpoints
                     query = query.Where(p => p.Title.ToLower().Contains(search) || p.Description.ToLower().Contains(search));
                 }
 
-            if (categoryId is not null)
+                if (categoryId is not null)
                 {                    
                     query = query.Where(p => p.ProductCategoryId==categoryId.Value);
                 }
 
                 var products = await query
-                    .Include(p => p.ProductCategories)
-                    .Include(p => p.Comments)
-                    .Where(p => !p.IsDeleted).Skip(skip).Take(pageSize)
+                    .Where(p => !p.IsDeleted)
+                    .Skip(skip)
+                    .Take(pageSize)
                     .ToListAsync();
+
+                var dtoList = products.Select(p => p.ToProductListDto()).ToList();
                 
                 return Results.Ok(new
                 {
                     TotalProductsNumber = totalProductsNumber,
                     CurrentPage = page,
                     totalPages = (int)Math.Ceiling(totalProductsNumber / (double)pageSize),
-                    Products = products
+                    Products = dtoList
                 });
             });
 
@@ -57,26 +61,27 @@ namespace server.Endpoints
                     .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted);
 
                 return product is not null
-                    ? Results.Ok(product)
+                    ? Results.Ok(product.ToProductDto())
                     : Results.NotFound("Produkt nie istnieje.");
             });
 
             // Dodawanie produktu
-            group.MapPost("/", async (Product product, DataContext context) =>
+            group.MapPost("/", async (ProductDto dto, DataContext context) =>
             {
+                var product = dto.FromProductsListDto();
+                product.CreationDate = DateTime.Now;
                 context.Products.Add(product);
                 await context.SaveChangesAsync();
                 return Results.Created($"/api/products/{product.Id}", product);
             });
 
             // Aktualizowanie produktu
-            group.MapPut("/{id}", async (int id, Product dto, DataContext context) =>
+            group.MapPut("/{id}", async (int id, ProductDto dto, DataContext context) =>
             {
-                var product = await context.Products.FindAsync(id);
+                var product = await context.Products.Include(p => p.ProductCategories).FirstOrDefaultAsync(p => p.Id == id);
                 if (product is null || product.IsDeleted)
                     return Results.NotFound("Produkt nie istnieje.");
 
-                // Aktualizuj dozwolone pola
                 product.Title = dto.Title;
                 product.Description = dto.Description;
                 product.ProductCategoryId = dto.ProductCategoryId;
