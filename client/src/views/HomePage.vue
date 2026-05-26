@@ -4,21 +4,13 @@ import axios from 'axios'
 import { RouterLink } from 'vue-router'
 import { cartActions } from '@/store/cart'
 import Navbar from '@/components/navbar.vue'
+import { productService } from '@/services/productService'
 
 const products = ref([])
 
-const fetchProducts = async () => {
-  try {
-    const response = await axios.get('https://localhost:7154/api/products')
-    products.value = response.data.products
-    console.log(response.data.products)
-  } catch (e) {
-    console.error("Błąd podczas pobierania produktów:", e)
-  }
-}
 
 onMounted(() => {
-  fetchProducts()
+  productService.getProductList()
 })
 </script>
 

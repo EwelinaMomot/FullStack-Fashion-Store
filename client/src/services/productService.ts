@@ -5,7 +5,7 @@ const BASE_URL='https://localhost:7154/api/products';
 
 export const productService={
 
-    async getProduct(): Promise<ProductDto[]>  {
+    async getProductList(): Promise<ProductDto[]>  {
   try {
     const response = await axios.get(BASE_URL)
     const rawProducts = response.data.products;

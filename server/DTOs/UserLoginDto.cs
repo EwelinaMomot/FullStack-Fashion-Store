@@ -1,6 +1,6 @@
 ﻿namespace server.DTOs
 {
-    public class UserDto
+    public class UserLoginDto
     {
         public required string Username { get; set; }
 
