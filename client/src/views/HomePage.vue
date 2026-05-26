@@ -1,16 +1,24 @@
 <script setup>
 import { ref,onMounted } from 'vue'
-import axios from 'axios'
 import { RouterLink } from 'vue-router'
 import { cartActions } from '@/store/cart'
 import Navbar from '@/components/navbar.vue'
 import { productService } from '@/services/productService'
 
 const products = ref([])
+const fetchProducts = async () => {
+  try {
+
+    products.value = await productService.getProductList()
+  } catch (error) {
+    console.error("Nie udało się załadować produktów:", error)
+  }
+}
 
 
 onMounted(() => {
-  productService.getProductList()
+  fetchProducts()
+  
 })
 </script>
 
