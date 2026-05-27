@@ -4,6 +4,7 @@ using server.Data;
 using server.Models;
 using server.DTOs;
 using server.Mappers;
+using System.Security.Claims;
 
 namespace server.Endpoints
 {
@@ -55,6 +56,7 @@ namespace server.Endpoints
             // Pobieranie produktu po ID (nieusunięte)
             group.MapGet("/{id}", async (int id, DataContext context) =>
             {
+                Console.WriteLine("heeej");
                 var product = await context.Products
                     .Include(p => p.ProductCategories)
                     .Include(p => p.Comments)
@@ -66,14 +68,34 @@ namespace server.Endpoints
             });
 
             // Dodawanie produktu
-            group.MapPost("/", async (ProductDetailDto dto, DataContext context) =>
+            group.MapPost("/", async (NewProductDto dto, DataContext context, ClaimsPrincipal token) =>
             {
-                var product = dto.ToProductListDto();
+                var userIdString = token.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (!int.TryParse(userIdString, out int userId))
+                {
+                    return Results.Unauthorized(); // Odrzucamy, jeśli coś jest nie tak z tokenem
+                }
+
+                var product = dto.FromNewProductDto();
+
                 product.CreationDate = DateTime.Now;
+                product.CreatorUserId = userId;
+
+                if (dto.CategoriesIds != null && dto.CategoriesIds.Any())
+                {
+
+                    var categories = await context.ProductCategories
+                        .Where(c => dto.CategoriesIds.Contains(c.Id))
+                        .ToListAsync();
+
+                    product.ProductCategories = categories;
+                }
+
                 context.Products.Add(product);
                 await context.SaveChangesAsync();
                 return Results.Created($"/api/products/{product.Id}", product);
-            });
+            }).RequireAuthorization();
 
             // Aktualizowanie produktu
             group.MapPut("/{id}", async (int id, ProductDetailDto dto, DataContext context) =>

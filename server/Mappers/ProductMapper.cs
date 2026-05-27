@@ -41,17 +41,14 @@ namespace server.Mappers
             };
         }
 
-        public static Product ToProductListDto(this ProductDetailDto dto)
+        public static Product FromNewProductDto(this NewProductDto dto)
         {
             return new Product
             {
                 Id = dto.Id,
                 Title = dto.Title,
                 Description = dto.Description,
-                ImageUrl = dto.ImageUrl,
-                CreationDate = dto.CreationDate,
-                CreatorUserId = dto.CreatorUserId,
-                ProductCategoryId = dto.ProductCategoryId
+                ImageUrl = dto.ImageUrl
             };
         }
     }

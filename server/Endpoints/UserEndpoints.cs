@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.DTOs;
 using server.Models;
+using server.Mappers;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -20,17 +21,13 @@ public static class UserEndpoints
         group.MapGet("/", async (DataContext context) =>
         {
             var users = await context.Users
-                .Include(u => u.UserRole)
-                .Select(u => new {
-                    u.Id,
-                    u.Username,
-                    RoleName = u.UserRole.Name,
-                    u.RoleId
-                })
+                .Include(u => u.UserRole)            
                 .ToListAsync();
 
-            return Results.Ok(users);
+            var usersDto = users.Select(u => u.toUserDto()).ToList();
+            return Results.Ok(usersDto);
         }).RequireAuthorization(policy => policy.RequireRole("Admin"));
+
 
         // Zmiana roli konkretnego użytkownika
         group.MapPut("/{id}/role", async (DataContext context, int id, UpdateUserRoleDto request) =>
