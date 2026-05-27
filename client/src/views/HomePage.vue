@@ -3,7 +3,7 @@ import { ref,onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { cartActions } from '@/store/cart'
 import Navbar from '@/components/navbar.vue'
-import { productService } from '@/services/productService'
+import { productService } from '@/services/ProductService'
 
 const products = ref([])
 const fetchProducts = async () => {
@@ -11,7 +11,7 @@ const fetchProducts = async () => {
 
     products.value = await productService.getProductList()
   } catch (error) {
-    console.error("Nie udało się załadować produktów:", error)
+    alert("Nie udało się załadować produktów:", error)
   }
 }
 

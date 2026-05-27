@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { cartActions } from '@/store/cart'
 import Navbar from '@/components/navbar.vue'
-import { productService } from '@/services/productService'
+import { productService } from '@/services/ProductService'
 
 const props = defineProps({
   productId: {
@@ -16,8 +16,9 @@ const product = ref(null)
 
 const fetchProductData = async (id) => {
   try{
-    product.value=  productService.getSingleProduct(productId)
-  }catch(error){     console.error("Nie udało się załadować produktu:", error)}
+
+    product.value=  productService.getSingleProduct(id)
+  }catch(error){  alert("Nie udało się załadować produktu:", error)}
 
 
 }

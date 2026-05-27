@@ -4,7 +4,7 @@ import HomeView from '../views/HomePage.vue'
 import CartView from '../views/ShoppingCartPage.vue'
 import SingleProductView from '@/views/SingleProductPage.vue'
 import AdminPageView from '@/views/AdminPageView.vue'
-import NewUserPageView from  '@/views/UserRegisterPageView.vue'
+import UserLoginPageView from  '@/views/UserRegisterPageView.vue'
 
 const routes = [
   {
@@ -25,7 +25,7 @@ const routes = [
   },
   {
     path: '/newuser',
-    component: NewUserPageView,
+    component: UserLoginPageView,
   },
   {
     path: '/product/:productId',

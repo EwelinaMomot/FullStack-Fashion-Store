@@ -1,7 +1,8 @@
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
+
 import Navbar from '@/components/navbar.vue'
+import { AuthService } from '@/services/AuthService'
 const isLoginMode = ref(true)
 
 const formData = ref({
@@ -16,12 +17,21 @@ const toggleMode = () => {
 
 const handleSubmit = () => {
   if (isLoginMode.value) {
-    // Logika logowania TODO
     console.log('Logowanie danymi:', formData.value.username, formData.value.password)
+    try{
+      var token = AuthService.login(formData)
+      localStorage.setItem('token', data.token);
+      alert("Pomyślnie zalogowano!")
+    }catch(error){
+      alert(error)
+    }
 
   } else {
-    //loguka rejestrowania TODO
     console.log('Rejestracja nowymi danymi:', formData.value)
+    try{
+      AuthService.register(formData)
+      alert("Pomyślnie zarejestrowano! Zaloguj się na swoje nowe konto :) ")
+    }catch(error){alert(error)}
 
   }
 }

@@ -2,16 +2,24 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import Navbar from '@/components/navbar.vue'
+import { userService } from '@/services/UserService'
+import { productService } from '@/services/ProductService'
+import { productCategoryService } from '@/services/ProductCategoriesService'
 
 
 const users = ref([
   ])
 
 const fetchUsers= async ()=>{
-    const response =await axios.get("https://localhost:7154/api/users")
-    users=response.data
-    console.log("users from backend",users)
+  try{
+    var request= userService.getUsersList()
+    users.value=request.data
+    //console.log("users from backend",users)
+  }catch(e){
+    alert(e)
+  }
 }
+
 const selectedUserId = ref('')
 const selectedRoleId = ref('')
 
@@ -20,13 +28,13 @@ const  handleRoleChange = async() => {
     alert('Wybierz użytkownika i nową rolę.')
     return
   }
-  const changeUserRoleDTO=new{selectedUserId,selectedRoleId}
+  const payload=new changeUserRoleDTO(selectedRoleId=selectedRoleId,selectedUserId=selectedUserId)
   try{
-  const request = await axios.put("https://localhost:7154/api/users/${//TODO mojeid}/role",changeUserRoleDTO)
+  const request = userService.changeUserRole(payload,)
+  alert(request.data.message)
   
-  console.log(request.data.message)
   }catch (e){
-    console.log("błąd serwera przy aktualizacji roli:",e)
+    alert(e)
   }
 }
 
@@ -35,26 +43,37 @@ const newProduct = ref({
   title: '',
   description: '',
   imageUrl: '',
-  creatorUserId: ''
+  categories: [] 
 })
+
+const availableCategories = ref([]);
+
+const fetchCategories = async () => {
+  try {
+
+    const response = productCategoryService.getAllCategories()
+    availableCategories.value = response.data;
+  } catch (error) {
+    alert(error)
+  }
+};
 
 const handleAddProduct = async() => {
   if (!newProduct.value.title) {
     alert('Tytuł produktu jest wymagany!')
     return
   }
-  // TODO newProduct.creatorUserId=
   try{
-  const request = await axios.post("https://localhost:7154/api/products",newProduct)
+  const request = productService.addProduct(newProduct)
   alert(`Dodano produkt: ${newProduct.value.title}`)
   // Czyszczenie formularza
   newProduct.value = {
     title: '',
     description: '',
     imageUrl: '',
-    creatorUserId: ''
+    categories: []
   }
-  }catch(e){alert("Błąd serwera przy dodawaniu produktu")}
+  }catch(e){alert(e)}
   
 }
 </script>
@@ -112,7 +131,7 @@ const handleAddProduct = async() => {
             <h2 class="card-title">Dodaj nowy produkt</h2>
           </div>
 
-          <form @submit.prevent="handleAddProduct" class="product-form">
+          <form @submit.prevent="handleAddProduct,fetchCategories" class="product-form">
             
             <div class="form-group">
               <label for="title" class="form-label">Tytuł produktu</label>
@@ -127,6 +146,18 @@ const handleAddProduct = async() => {
             <div class="form-group">
               <label for="description" class="form-label">Opis </label>
               <textarea id="description" v-model="newProduct.description" rows="3" placeholder="Wprowadź opis produktu..." class="chrome-input chrome-textarea"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="categories" class="form-label">Kategorie (możesz wybrać kilka :))</label>
+              <select id="categories" v-model="newProduct.categories" multiple class="chrome-input" style="height: auto; min-height: 100px;">
+                <option v-for="category in availableCategories" :key="category.id" :value="category.id">
+                  {{ category.name }}
+                </option>
+              </select>
+              <small style="color: #666; font-size: 0.8rem; margin-top: 4px; display: block;">
+                Przytrzymaj klawisz <b>Ctrl</b> (Windows) lub <b>Cmd</b> (Mac), aby zaznaczyć wiele kategorii.
+              </small>
             </div>
 
             <button type="submit" class="btn-chrome-action">

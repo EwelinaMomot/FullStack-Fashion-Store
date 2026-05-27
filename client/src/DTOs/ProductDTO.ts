@@ -1,4 +1,4 @@
-import { CommentDto,mapToCommentListDto } from './CommentDto';
+import { CommentDto } from './CommentDto';
 
 export interface ProductDto {
     id: number;
@@ -23,40 +23,11 @@ export interface ProductListDto {
 
 }
 
-export const mapToProductDto=(rawProduct : any): ProductDto=>{
-    return{
-        id: rawProduct.id ||-1,
-        title: rawProduct.title || "Brak nazwy",
-        description:rawProduct.description || '',
-        imageUrl: rawProduct.imageUrl || null,
-        categoryId: rawProduct.productCategoryId || -1,
-        creationDate: rawProduct.creationDate ? new Date(rawProduct.creationDate) : null
-        ,creatorUserId:rawProduct.creatorUserId || -1,
-          
-        comments: mapToCommentListDto(rawProduct.comments),
-    productCategoryIdList: Array.isArray(rawProduct.productCategoryIdList) ? rawProduct.productCategoryIdList : []
-  };  
+export interface NewProductDto {
+    title: string;
+    description: string;
+    imageUrl: string | null;
+    productCategoryIdList: Array<number>;
 }
 
-export const mapToProductList=(rawProduct : any): ProductListDto=>{
-    console.log("t",rawProduct)
-    return{
-        id: rawProduct.id ||-1,
-        title: rawProduct.title || "Brak nazwy",
-        description:rawProduct.description || '',
-        imageUrl: rawProduct.imageUrl || null,
-        categoryId: rawProduct.productCategoryId || -1,
-        creationDate: rawProduct.creationDate ? new Date(rawProduct.creationDate) : null
-        ,creatorUserId:rawProduct.creatorUserId || -1,
-          };  
-}
-
-export const mapToProductListDto=(rawInput:any):ProductListDto[]=>{
-    if (!Array.isArray(rawInput)){
-        return [];
-    };
-
-    return rawInput.map((product)=>mapToProductList(product))
-
-  }
 
