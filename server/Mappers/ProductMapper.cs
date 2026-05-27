@@ -20,9 +20,9 @@ namespace server.Mappers
             };
         }
 
-        public static ProductDto ToProductDto(this Product p)
+        public static ProductDetailDto ToProductDetailDto(this Product p)
         {
-            return new ProductDto
+            return new ProductDetailDto
             {
                 Id = p.Id,
                 Title = p.Title,
@@ -41,7 +41,7 @@ namespace server.Mappers
             };
         }
 
-        public static Product FromProductsListDto(this ProductDto dto)
+        public static Product ToProductListDto(this ProductDetailDto dto)
         {
             return new Product
             {

@@ -52,7 +52,7 @@ namespace server.Endpoints
             var group = app.MapGroup("/api/auth");
 
 
-            group.MapPost("/register", async (DataContext context, UserDto request) =>
+            group.MapPost("/register", async (DataContext context, UserLoginDto request) =>
 
             {
                 //check if user already exists
@@ -79,7 +79,7 @@ namespace server.Endpoints
                 return Results.Ok($"Pomyślnie utworzono użytkownika {request.Username}");
             });
 
-            group.MapPost("/login", async (DataContext context, UserDto request, IConfiguration configuration) =>
+            group.MapPost("/login", async (DataContext context, UserLoginDto request, IConfiguration configuration) =>
             {
                 var user = await context.Users.Include(u=>u.UserRole).FirstOrDefaultAsync(u => u.Username == request.Username);
 

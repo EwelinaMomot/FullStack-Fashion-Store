@@ -61,14 +61,14 @@ namespace server.Endpoints
                     .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted);
 
                 return product is not null
-                    ? Results.Ok(product.ToProductDto())
+                    ? Results.Ok(product.ToProductDetailDto())
                     : Results.NotFound("Produkt nie istnieje.");
             });
 
             // Dodawanie produktu
-            group.MapPost("/", async (ProductDto dto, DataContext context) =>
+            group.MapPost("/", async (ProductDetailDto dto, DataContext context) =>
             {
-                var product = dto.FromProductsListDto();
+                var product = dto.ToProductListDto();
                 product.CreationDate = DateTime.Now;
                 context.Products.Add(product);
                 await context.SaveChangesAsync();
@@ -76,7 +76,7 @@ namespace server.Endpoints
             });
 
             // Aktualizowanie produktu
-            group.MapPut("/{id}", async (int id, ProductDto dto, DataContext context) =>
+            group.MapPut("/{id}", async (int id, ProductDetailDto dto, DataContext context) =>
             {
                 var product = await context.Products.Include(p => p.ProductCategories).FirstOrDefaultAsync(p => p.Id == id);
                 if (product is null || product.IsDeleted)
