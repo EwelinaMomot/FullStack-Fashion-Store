@@ -31,7 +31,8 @@ namespace server.Mappers
                 CreationDate = p.CreationDate,
                 CreatorUserId = p.CreatorUserId,
                 ProductCategoryId = p.ProductCategoryId,
-                Categories = p.ProductCategories?.Select(c => c.Id).ToList() ?? new List<int>(),
+                Categories = p.ProductCategories?.Select(c => c.Name).ToList() ?? new List<string>(),
+                CategoriesIds= p.ProductCategories?.Select(c => c.Id).ToList() ?? new List<int>(),
                 Comments = p.Comments?.Where(c => !c.IsDeleted).Select(c => new CommentDto
                 {
                     Id = c.Id,
@@ -45,10 +46,10 @@ namespace server.Mappers
         {
             return new Product
             {
-                Id = dto.Id,
                 Title = dto.Title,
                 Description = dto.Description,
-                ImageUrl = dto.ImageUrl
+                ImageUrl = dto.ImageUrl,
+    
             };
         }
     }

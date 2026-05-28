@@ -30,7 +30,7 @@ public static class UserEndpoints
 
 
         // Zmiana roli konkretnego użytkownika
-        group.MapPut("/{id}/role", async (DataContext context, int id, UpdateUserRoleDto request) =>
+        group.MapPut("/{id}/role", async (DataContext context, int id, UpdateUserRoleDto dto) =>
         {
             var user = await context.Users.FindAsync(id);
 
@@ -38,39 +38,39 @@ public static class UserEndpoints
                 return Results.NotFound("Nie znaleziono użytkownika.");
 
             // Sprawdzamy czy nowa rola istnieje w tabeli UserRoles 
-            var roleExists = await context.UserRoles.AnyAsync(r => r.Id == request.RoleId);
+            var roleExists = await context.UserRoles.AnyAsync(r => r.Id == dto.RoleId);
             if (!roleExists)
                 return Results.BadRequest("Wybrana rola nie istnieje.");
-            if (user.RoleId == request.RoleId)
+            if (user.RoleId == dto.RoleId)
                 return Results.BadRequest("Użytkownik ma już taką samą rolę.");
 
-            user.RoleId = request.RoleId;
+            user.RoleId = dto.RoleId;
             await context.SaveChangesAsync();
 
-            return Results.Ok(new { message = $"Użytkownik {user.Username} ma teraz nową rolę: {user.UserRole.Name}" });
+            return Results.Ok();
         }).RequireAuthorization(policy => policy.RequireRole("Admin"));
 
         //edycja danych użytkownika
-        group.MapPut("/{id}", async (DataContext context, int id, UpdateUserDto request) =>
+        group.MapPut("/{id}", async (DataContext context, int id, UpdateUserDto dto) =>
         {
             var user = await context.Users.FindAsync(id);
             if (user == null) return Results.NotFound("Użytkownik nie istnieje.");
 
             // 1. Aktualizacja loginu (jeśli podano i nie jest zajęty)
-            if (!string.IsNullOrEmpty(request.Username) && request.Username != user.Username)
+            if (!string.IsNullOrEmpty(dto.Username) && dto.Username != user.Username)
             {
-                if (await context.Users.AnyAsync(u => u.Username == request.Username))
+                if (await context.Users.AnyAsync(u => u.Username == dto.Username))
                     return Results.BadRequest("Ta nazwa użytkownika jest już zajęta.");
 
-                user.Username = request.Username;
+                user.Username = dto.Username;
             }
 
             // 2. Aktualizacja hasła (jeśli podano nowe)
-            if (!string.IsNullOrEmpty(request.Password))
+            if (!string.IsNullOrEmpty(dto.Password))
             {
                 using var hmac = new HMACSHA512();
                 user.PasswordSalt = hmac.Key;
-                user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(request.Password));
+                user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password));
             }
 
             await context.SaveChangesAsync();

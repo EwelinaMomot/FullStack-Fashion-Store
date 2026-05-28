@@ -12,7 +12,9 @@
 
         public int CreatorUserId {get;set;}
 
-        public List<int> Categories { get; set; } = new();
+        public List<string> Categories { get; set; } = new();
+
+        public List<int> CategoriesIds { get; set; } = new();
 
         public List<CommentDto> Comments { get; set; } = new();
     }
@@ -31,12 +33,11 @@
 
     public class NewProductDto
     {
-        public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string ImageUrl { get; set; }
 
-        public List<int> CategoriesIds { get; set; } = new();
+        public List<int> productCategoryIdList { get; set; } = new();
 
     }
 }

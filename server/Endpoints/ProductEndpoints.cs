@@ -82,11 +82,11 @@ namespace server.Endpoints
                 product.CreationDate = DateTime.Now;
                 product.CreatorUserId = userId;
 
-                if (dto.CategoriesIds != null && dto.CategoriesIds.Any())
+                if (dto.productCategoryIdList != null && dto.productCategoryIdList.Any())
                 {
 
                     var categories = await context.ProductCategories
-                        .Where(c => dto.CategoriesIds.Contains(c.Id))
+                        .Where(c => dto.productCategoryIdList.Contains(c.Id))
                         .ToListAsync();
 
                     product.ProductCategories = categories;
@@ -98,16 +98,25 @@ namespace server.Endpoints
             }).RequireAuthorization();
 
             // Aktualizowanie produktu
-            group.MapPut("/{id}", async (int id, ProductDetailDto dto, DataContext context) =>
+            group.MapPut("/{id}", async (int id, NewProductDto dto, DataContext context) =>
             {
                 var product = await context.Products.Include(p => p.ProductCategories).FirstOrDefaultAsync(p => p.Id == id);
                 if (product is null || product.IsDeleted)
                     return Results.NotFound("Produkt nie istnieje.");
 
+                // Pobierz kategorie z bazy na podstawie przekazanych ID
+                var categories = new List<ProductCategory>();
+                if (dto.productCategoryIdList != null && dto.productCategoryIdList.Any())
+                {
+                    categories = await context.ProductCategories
+                        .Where(c => dto.productCategoryIdList.Contains(c.Id))
+                        .ToListAsync();
+                }
+                
                 product.Title = dto.Title;
                 product.Description = dto.Description;
-                product.ProductCategoryId = dto.ProductCategoryId;
                 product.ImageUrl = dto.ImageUrl;
+                product.ProductCategories = categories;
                 // Nie nadpisujemy CreationDate ani CreatorUserId domyślnie
 
                 await context.SaveChangesAsync();
