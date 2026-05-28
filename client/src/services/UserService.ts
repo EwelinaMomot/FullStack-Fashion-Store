@@ -9,7 +9,7 @@ export const userService={
 
     async getUsersList():Promise<UserDto[]>{
         try{
-            const request = await axios.get("/")
+            const request = await axios.get(BASE_URL+"/")
             return request.data
         }catch(e){ console.log("Błąd podczas pobierania listy użytkowników:",e) 
             throw("Błąd podczas pobierania listy użytkowników")
@@ -18,7 +18,7 @@ export const userService={
 
     async changeUserRole(payload:changeUserRoleDTO){
         try{
-            const request = await axios.put('/${payload.selectedUserId}/role')
+            const request = await axios.put(BASE_URL+`/${payload.userId}/role`,payload)
             return request.data
         }catch(e){
             console.log("Błąd przy zmianie roli użytkownika",e)

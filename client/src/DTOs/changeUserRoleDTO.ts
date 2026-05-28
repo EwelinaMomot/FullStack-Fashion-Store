@@ -1,5 +1,5 @@
 
 export interface changeUserRoleDTO{
-    selectedUserId:number;
-    selectedRoleId:number;
+    userId:number;
+    roleId:number;
 }

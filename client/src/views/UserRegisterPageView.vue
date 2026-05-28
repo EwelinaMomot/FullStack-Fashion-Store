@@ -1,9 +1,11 @@
 <script setup>
-import { ref } from 'vue'
-
+import { ref, onMounted } from 'vue'
+import {jwtDecode} from 'jwt-decode'
 import Navbar from '@/components/navbar.vue'
 import { AuthService } from '@/services/AuthService'
 const isLoginMode = ref(true)
+const isUserLogged = ref(false)
+const username = ref('')
 
 const formData = ref({
   username: '',
@@ -15,13 +17,19 @@ const toggleMode = () => {
   formData.value = { username: '', password: '' }
 }
 
-const handleSubmit = () => {
+const handleSubmit =async () => {
   if (isLoginMode.value) {
     console.log('Logowanie danymi:', formData.value.username, formData.value.password)
+
     try{
-      var token = AuthService.login(formData)
-      localStorage.setItem('token', data.token);
+      var response = await AuthService.login(formData.value)
+      var token = response
+      localStorage.setItem('token', token);
+      isUserLogged.value = true
+      const decoded = jwtDecode(token)
+      username.value = decoded.sub || formData.value.username
       alert("Pomyślnie zalogowano!")
+      formData.value = { username: '', password: '' }
     }catch(error){
       alert(error)
     }
@@ -29,18 +37,43 @@ const handleSubmit = () => {
   } else {
     console.log('Rejestracja nowymi danymi:', formData.value)
     try{
-      AuthService.register(formData)
+       var response = await AuthService.register(formData.value)
+       console.log(response.data)
+
       alert("Pomyślnie zarejestrowano! Zaloguj się na swoje nowe konto :) ")
+      formData.value = { username: '', password: '' }
     }catch(error){alert(error)}
 
   }
 }
+
+const logout = () => {
+  localStorage.removeItem('token')
+  isUserLogged.value = false
+  username.value = ''
+  alert('Wylogowano pomyślnie!')
+}
+
+onMounted(async () => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    isUserLogged.value = true
+    try {
+      const decoded = jwtDecode(token)
+      username.value = decoded.sub || ''
+    } catch (error) {
+      console.error('Błąd przy dekodowaniu tokenu:', error)
+    }
+  } else {
+    isUserLogged.value = false
+  }
+})
 </script>
 
 <template>
   <div class="auth-page-wrapper">
     <Navbar/>
-    <div class="auth-card">
+    <div v-if="!isUserLogged"class="auth-card">
       
       <header class="auth-header">
         <div class="icon-wrapper">
@@ -55,7 +88,7 @@ const handleSubmit = () => {
 
       <form @submit.prevent="handleSubmit" class="auth-form">
         
-        <div v-if="!isLoginMode" class="form-group">
+        <div  class="form-group">
           <label for="username" class="form-label">Nazwa użytkownika</label>
           <input 
             type="text" 
@@ -96,6 +129,17 @@ const handleSubmit = () => {
         </p>
       </div>
 
+    </div>
+    <div v-else class="logged-in-card">
+      <div class="logged-in-content">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="user-icon">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <h2 class="logged-in-title">Zalogowano na konto</h2>
+        <p class="username-display">{{ username }}</p>
+        <button @click="logout" class="btn-logout">Wyloguj się</button>
+      </div>
     </div>
   </div>
 </template>
@@ -259,5 +303,72 @@ const handleSubmit = () => {
 
 .btn-toggle-mode:hover {
   text-decoration-color: #1a73e8;
+}
+
+.logged-in-card {
+  background: #ffffff;
+  border-radius: 32px;
+  width: 100%;
+  max-width: 440px;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 10px 30px rgba(175, 205, 240, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.logged-in-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.user-icon {
+  color: #1a73e8;
+  background: #e8f0fe;
+  width: 80px;
+  height: 80px;
+  padding: 16px;
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+}
+
+.logged-in-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #202124;
+  margin: 0 0 1rem 0;
+}
+
+.username-display {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1a73e8;
+  margin: 0 0 2rem 0;
+  word-break: break-all;
+}
+
+.btn-logout {
+  width: 100%;
+  background: #dc3545;
+  color: #ffffff;
+  border: none;
+  padding: 1rem;
+  border-radius: 9999px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.btn-logout:hover {
+  background: #c82333;
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+  transform: translateY(-2px);
 }
 </style>

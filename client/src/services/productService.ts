@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {  ProductDto,ProductListDto,NewProductDto } from '@/DTOs/ProductDto';
+import {  ProductDetailDto,ProductListDto,NewProductDto } from '@/DTOs/ProductDto';
 import {mapToProductListDto,mapToProductDto} from '@/mappers/ProductMapper'
 
 const BASE_URL='https://localhost:7154/api/products';
@@ -33,7 +33,7 @@ export const productService={
       throw("Błąd w serwisie podczas pobierania produktów");  }
 },
 
-  async getSingleProduct( id: number): Promise<ProductDto>  {
+  async getSingleProduct( id: number): Promise<ProductDetailDto>  {
   try {
     const response = await axios.get(BASE_URL+`/${id}`)
     const rawProduct = response.data;
@@ -53,6 +53,30 @@ async addProduct(newProduct:NewProductDto){
   } catch (error) {
     console.error("Błąd w serwisie podczas dodawania produktu:", error);
       throw("Błąd w serwisie podczas dodawania produktu");  }
-}
+  },
+
+
+  async deleteProduct(productId:Number){
+    try{
+      const request = await axios.delete(BASE_URL+`/${productId}`)
+      return
+    }catch(e){
+        console.error("Błąd podczas usuwania produktu:", e);
+      throw("Błąd podczas usuwania produktu");  }
+    
+  },
+
+  async editProduct(productId:Number,product:NewProductDto){
+    try{
+      const request = await axios.put(BASE_URL+`/${productId}`,product)
+      console.log(request.data)
+      return
+    }catch(e){
+        console.error("Błąd podczas edytowania produktu:", e);
+      throw("Błąd podczas edytowania produktu");  }
+    
+  }
+
+
 }
 

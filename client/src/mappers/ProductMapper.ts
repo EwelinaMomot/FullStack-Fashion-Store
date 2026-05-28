@@ -1,9 +1,9 @@
-import { ProductDto } from "@/DTOs/ProductDto";
+import { ProductDetailDto } from "@/DTOs/ProductDto";
 import { ProductListDto } from "@/DTOs/ProductDto";
 import { mapToCommentListDto } from "./CommentMapper";
 
-export const mapToProductDto=(rawProduct : any): ProductDto=>{
-    console.log(rawProduct)
+export const mapToProductDto=(rawProduct : any): ProductDetailDto=>{
+
     return{
         id: rawProduct.id ||-1,
         title: rawProduct.title || "Brak nazwy",
@@ -14,8 +14,10 @@ export const mapToProductDto=(rawProduct : any): ProductDto=>{
         ,creatorUserId:rawProduct.creatorUserId || -1,
           
         comments: mapToCommentListDto(rawProduct.comments),
-    productCategoryIdList: Array.isArray(rawProduct.productCategoryIdList) ? rawProduct.productCategoryIdList : []
-  };  
+        productCategoryList: Array.isArray(rawProduct.categories) ? rawProduct.categories : [],
+        productCategoryIdList: Array.isArray(rawProduct.categoriesIds) ? rawProduct.categoriesIds : [],
+          }; 
+           
 }
 
 export const mapToProductList=(rawProduct : any): ProductListDto=>{

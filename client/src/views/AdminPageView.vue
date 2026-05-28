@@ -1,10 +1,12 @@
 <script setup>
-import { ref } from 'vue'
-import axios from 'axios'
+import { ref, onMounted } from 'vue'
+import { jwtDecode } from 'jwt-decode'
+import { RouterLink } from 'vue-router'
 import Navbar from '@/components/navbar.vue'
 import { userService } from '@/services/UserService'
 import { productService } from '@/services/ProductService'
 import { productCategoryService } from '@/services/ProductCategoriesService'
+
 
 
 const users = ref([
@@ -12,9 +14,8 @@ const users = ref([
 
 const fetchUsers= async ()=>{
   try{
-    var request= userService.getUsersList()
-    users.value=request.data
-    //console.log("users from backend",users)
+    var request= await userService.getUsersList()
+    users.value=request
   }catch(e){
     alert(e)
   }
@@ -22,17 +23,33 @@ const fetchUsers= async ()=>{
 
 const selectedUserId = ref('')
 const selectedRoleId = ref('')
+const isAdmin = ref(false)
 
-const  handleRoleChange = async() => {
+const checkUserRole = () => {
+  const token = localStorage.getItem('token')
+  if (token){
+    try {
+      const decodedPayload = jwtDecode(token)
+      isAdmin.value = decodedPayload.role === 'Admin'
+    } catch (error) {
+      console.error("Nieprawidłowy token JWT", error)
+    }
+  }
+}
+
+const handleRoleChange = async() => {
   if (!selectedUserId.value || !selectedRoleId.value) {
     alert('Wybierz użytkownika i nową rolę.')
     return
   }
-  const payload=new changeUserRoleDTO(selectedRoleId=selectedRoleId,selectedUserId=selectedUserId)
+  const payload = {
+    userId: parseInt(selectedUserId.value),
+    roleId: parseInt(selectedRoleId.value)
+  }
   try{
-  const request = userService.changeUserRole(payload,)
-  alert(request.data.message)
-  
+    const request = await userService.changeUserRole(payload)
+    alert(request.data.message)
+    await fetchUsers()
   }catch (e){
     alert(e)
   }
@@ -76,12 +93,18 @@ const handleAddProduct = async() => {
   }catch(e){alert(e)}
   
 }
+
+onMounted(async () => {
+  checkUserRole()
+  await fetchUsers()
+  await fetchCategories()
+})
 </script>
 
 <template>
   <div class="admin-page-wrapper">
     <Navbar />
-    <div class="admin-container">
+    <div v-if="isAdmin" class="admin-container">
       
       <header class="admin-header">
         <h1 class="page-title">Panel Administratora</h1>
@@ -102,7 +125,7 @@ const handleAddProduct = async() => {
               <select id="user-select" v-model="selectedUserId" class="chrome-input">
                 <option disabled value="">Wybierz z listy</option>
                 <option v-for="user in users" :key="user.id" :value="user.id">
-                  {{ user.name }} (Obecnie: {{ user.role }})
+                  {{ user.username }} (Obecnie: {{ user.roleName }})
                 </option>
               </select>
             </div>
@@ -166,6 +189,23 @@ const handleAddProduct = async() => {
           </form>
         </section>
 
+      </div>
+    </div>
+
+    <div v-else class="access-denied-container">
+      <div class="access-denied-card">
+        <div class="denied-icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <h2 class="denied-title">Dostęp zabroniony</h2>
+        <p class="denied-message">Ten panel jest dostępny tylko dla administratorów. Nie masz uprawnień, aby przeglądać tę zawartość.</p>
+        <RouterLink to="/" class="btn-back-home">
+          Wróć do strony głównej
+        </RouterLink>
       </div>
     </div>
   </div>
@@ -365,6 +405,71 @@ const handleAddProduct = async() => {
 }
 
 .btn-chrome-action:hover {
+  background: #1557b0;
+  box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+  transform: translateY(-2px);
+}
+
+.access-denied-container {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.access-denied-card {
+  background: #ffffff;
+  border-radius: 32px;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 10px 30px rgba(175, 205, 240, 0.4);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.denied-icon-wrapper {
+  color: #d93025;
+  background: #fce8e6;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.denied-title {
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: #202124;
+  margin: 0 0 1rem 0;
+}
+
+.denied-message {
+  font-size: 1rem;
+  font-weight: 300;
+  color: #5f6368;
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+}
+
+.btn-back-home {
+  display: inline-block;
+  background: #1a73e8;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 0.9rem 2rem;
+  border-radius: 24px;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-back-home:hover {
   background: #1557b0;
   box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
   transform: translateY(-2px);

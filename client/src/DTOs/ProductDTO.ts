@@ -1,6 +1,11 @@
 import { CommentDto } from './CommentDto';
 
-export interface ProductDto {
+export interface CategoryDto {
+    id: number;
+    name: string;
+}
+
+export interface ProductDetailDto {
     id: number;
     title: string;
     description: string;
@@ -9,7 +14,9 @@ export interface ProductDto {
     creationDate: Date | null;
     creatorUserId: number;
     comments: Array<CommentDto>;
+    productCategoryList: Array<string>;
     productCategoryIdList: Array<number>;
+   
 }
 
 export interface ProductListDto {
