@@ -2,6 +2,7 @@
 import { cartActions, cartState } from '@/store/cart';
 import { computed } from 'vue'
 import Navbar from '@/components/navbar.vue'
+import CartItemCard from '@/components/CartItemCard.vue'
 
 //lokalna referencja
 const cartItems = computed(()=>cartState.items)
@@ -29,35 +30,14 @@ const proceedToCheckout = () => {
       <div v-if="cartItems.length > 0" class="cart-content-layout">
         
         <div class="cart-items-list">
-          <article v-for="item in cartItems" :key="item.id" class="cart-item-card">
-            
-            <div class="item-media">
-              <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.title" />
-              <div v-else class="placeholder">Brak zdjęcia</div>
-              <div class="silver-edge-vertical"></div>
-            </div>
-
-            <div class="item-details">
-              <div class="item-header">
-                <h4 class="item-title">{{ item.title }}</h4>
-                <button @click="removeFromCart(item.id)" class="btn-remove" title="Usuń produkt">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-              </div>
-              
-              <p class="item-desc">{{ item.description }}</p>
-
-              <div class="item-footer">
-                <div class="quantity-selector">
-                  <button @click="decreaseQuantity(item)" class="qty-btn" :disabled="item.quantity <= 0">-</button>
-                  <span class="qty-value">{{ item.quantity || 1 }}</span>
-                  <button @click="increaseQuantity(item)" class="qty-btn">+</button>
-                </div>
-               
-              </div>
-            </div>
-
-          </article>
+          <CartItemCard 
+            v-for="item in cartItems" 
+            :key="item.id" 
+            :item="item"
+            :on-remove="removeFromCart"
+            :on-increase-qty="increaseQuantity"
+            :on-decrease-qty="decreaseQuantity"
+          />
         </div>
 
        
@@ -141,143 +121,6 @@ const proceedToCheckout = () => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-}
-
-.cart-item-card {
-  display: flex;
-  background: #ffffff;
-  border-radius: 32px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(201, 222, 250, 0.5);
-  transition: box-shadow 0.3s ease;
-}
-
-.cart-item-card:hover {
-  box-shadow: 0 6px 30px rgba(201, 222, 250, 0.7);
-}
-
-.item-media {
-  flex: 0 0 120px;
-  height: 120px;
-  background: #f4f8fd;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  margin-right: 1.5rem;
-}
-
-.item-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.placeholder {
-  color: #a1c2fa;
-  font-size: 0.85rem;
-}
-
-.item-details {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.item-title {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #202124;
-  margin: 0 0 0.25rem 0;
-}
-
-.btn-remove {
-  background: #fce8e6;
-  color: #d93025;
-  border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.btn-remove:hover {
-  background: #fad2cf;
-}
-
-.item-desc {
-  font-size: 0.9rem;
-  font-weight: 300;
-  color: #5f6368;
-  margin: 0 0 1rem 0;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.item-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: auto;
-}
-
-.quantity-selector {
-  display: flex;
-  align-items: center;
-  background: #f1f3f4;
-  border-radius: 9999px;
-  padding: 0.25rem;
-}
-
-.qty-btn {
-  background: transparent;
-  border: none;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  font-size: 1.2rem;
-  color: #3c4043;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s;
-}
-
-.qty-btn:hover:not(:disabled) {
-  background: #e8eaed;
-}
-
-.qty-btn:disabled {
-  color: #bdc1c6;
-  cursor: not-allowed;
-}
-
-.qty-value {
-  padding: 0 0.75rem;
-  font-weight: 500;
-  font-size: 0.95rem;
-  min-width: 20px;
-  text-align: center;
-}
-
-.price-total {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #202124;
 }
 
 

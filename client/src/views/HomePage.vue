@@ -1,8 +1,8 @@
 <script setup>
 import { ref,onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
 import { cartActions } from '@/store/cart'
 import Navbar from '@/components/navbar.vue'
+import ProductCard from '@/components/ProductCard.vue'
 import { productService } from '@/services/ProductService'
 
 const products = ref([])
@@ -40,28 +40,12 @@ onMounted(() => {
           <p v-if="products.length === 0" class="loading">Ładowanie produktów lub brak danych...</p>
 
          <div v-else class="grid">
-            <RouterLink 
+            <ProductCard 
               v-for="product in products" 
               :key="product.id" 
-              :to="{ name: 'product-detail', params: { productId: product.id } }" 
-              class="card"
-              tag="article" 
-            >
-              <div class="card-media">
-                <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.title" />
-                <div v-else class="placeholder">Brak zdjęcia</div>
-              </div>
-              
-              <div class="card-body">
-                <h4 class="product-title">{{ product.title }}</h4>
-                <p class="product-desc">{{ product.description }}</p>
-                <div class="card-footer">
-                  <span class="price">{{ product.price ? product.price + ' zł' : '' }}</span>
-                  <button class="buy" @click.stop="cartActions.addToCart(product)">Do koszyka</button>
-                </div>
-              </div>
-              <div class="silver-edge"></div>
-            </RouterLink>
+              :product="product"
+              :on-add-to-cart="cartActions.addToCart"
+            />
           </div>
         </section>
       </main>
@@ -139,104 +123,5 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2.5rem;
-}
-
-.card {
-  background: #ffffff;
-  border-radius: 32px; 
-  text-decoration: none;
-  color: inherit;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-
-  box-shadow: 0 10px 30px rgba(175, 205, 240, 0.35);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.card:hover {
-  box-shadow: 0 16px 40px rgba(175, 205, 240, 0.55);
-  transform: translateY(-4px);
-}
-
-.card-media {
-  height: 220px;
-  background: #f4f8fd; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.card-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.placeholder {
-  color: #a1c2fa;
-  font-weight: 400;
-  font-size: 0.9rem;
-}
-
-.card-body {
-  padding: 1.75rem;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.product-title {
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin: 0 0 0.5rem 0;
-  color: #202124;
-}
-
-.product-desc {
-  font-size: 0.95rem;
-  font-weight: 300;
-  color: #5f6368;
-  margin-bottom: 2rem;
-  line-height: 1.6;
-  flex-grow: 1;
-}
-
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.price {
-  font-size: 1.15rem;
-  font-weight: 500;
-  color: #202124;
-}
-
-.buy {
-  background: #e8f0fe; 
-  color: #1a73e8; 
-  border: none;
-  padding: 0.6rem 1.25rem;
-  border-radius: 24px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.buy:hover {
-  background: #d2e3fc;
-}
-
-.silver-edge {
-  height: 3px;
-  background: linear-gradient(90deg, transparent, rgba(160, 195, 235, 0.3), transparent);
-  width: 100%;
-  position: absolute;
-  bottom: 0;
 }
 </style>
