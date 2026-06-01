@@ -47,7 +47,7 @@ export const productService={
 
 async addProduct(newProduct:NewProductDto){
    try {
-    const response = await axios.post(BASE_URL,newProduct,)
+    const response = await axios.post(BASE_URL,newProduct)
     return 
    
   } catch (error) {

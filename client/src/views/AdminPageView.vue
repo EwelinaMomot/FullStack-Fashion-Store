@@ -48,7 +48,7 @@ const handleRoleChange = async() => {
   }
   try{
     const request = await userService.changeUserRole(payload)
-    alert(request.data.message)
+    alert("Pomyślnie zmieniono rolę!")
     await fetchUsers()
   }catch (e){
     alert(e)
@@ -68,8 +68,9 @@ const availableCategories = ref([]);
 const fetchCategories = async () => {
   try {
 
-    const response = productCategoryService.getAllCategories()
-    availableCategories.value = response.data;
+    const response =await productCategoryService.getAllCategories()
+    availableCategories.value = response.categories;
+
   } catch (error) {
     alert(error)
   }
@@ -81,7 +82,7 @@ const handleAddProduct = async() => {
     return
   }
   try{
-  const request = productService.addProduct(newProduct)
+  const request =await  productService.addProduct(newProduct.value)
   alert(`Dodano produkt: ${newProduct.value.title}`)
   // Czyszczenie formularza
   newProduct.value = {
@@ -154,7 +155,7 @@ onMounted(async () => {
             <h2 class="card-title">Dodaj nowy produkt</h2>
           </div>
 
-          <form @submit.prevent="handleAddProduct,fetchCategories" class="product-form">
+          <form @submit.prevent="handleAddProduct(); fetchCategories();" class="product-form">
             
             <div class="form-group">
               <label for="title" class="form-label">Tytuł produktu</label>
@@ -319,6 +320,7 @@ onMounted(async () => {
   width: 100%;
   background: #f1f3f4; 
   border: 2px solid transparent;
+  box-sizing: border-box;
   color: #202124;
   font-family: inherit;
   font-size: 1rem;

@@ -7,7 +7,7 @@ import { totalItemsCount } from '../store/cart'
     <div class="nav-container">
       
       <RouterLink to="/" class="brand-logo">
-        M/G <span class="brand-accent">STUDIO</span>
+        E/M <span class="brand-accent">STUDIO</span>
       </RouterLink>
 
       <div class="nav-links">

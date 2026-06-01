@@ -27,7 +27,7 @@ onMounted(() => {
       <Navbar />
       <header class="hero">
         <div class="hero-inner">
-          <h2 class="brand">Fashion Store</h2>
+          <h2 class="brand">E/M Studio Fashion Store</h2>
           <p class="tagline">Zapraszamy</p>
           <a class="cta" href="#products">Zobacz moją kolekcję</a>
         </div>

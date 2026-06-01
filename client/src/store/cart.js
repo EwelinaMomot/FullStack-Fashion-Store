@@ -13,12 +13,8 @@ watch(
     (newItems)=> { localStorage.setItem('shopping_cart', JSON.stringify(newItems))},
     {deep:true}//pilnujemy zmian nie tylko samych itemow ale takze ich wlasciwosci(quantity)
 )
-//export pozwala innym plikom używać tej wartosci
-export const totalPrice= computed(()=>{
-    //reduce=redukuje cala liste do jednej liczby
-    return cartState.items.reduce((total,item)=>total+item.price *item.quantity,0)
-})
 
+//export pozwala innym plikom używać tej wartosci
 export const totalItemsCount=computed(()=>{
     return cartState.items.reduce((total,item)=>total+item.quantity,0)
 })

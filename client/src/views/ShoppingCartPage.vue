@@ -1,18 +1,17 @@
 <script setup>
-import { cartActions, cartState, totalPrice } from '@/store/cart';
+import { cartActions, cartState } from '@/store/cart';
 import { computed } from 'vue'
 import Navbar from '@/components/navbar.vue'
 
 //lokalna referencja
 const cartItems = computed(()=>cartState.items)
-const cartTotal = computed(()=>totalPrice.value)
 
 const increaseQuantity=(item)=>cartActions.increaseQuantity(item.id)
 const decreaseQuantity = (item) => cartActions.decreaseQuantity(item.id)
 const removeFromCart = (id) => cartActions.removeFromCart(id)
 
 const proceedToCheckout = () => {
-  alert(`Przejście do kasy. Do zapłaty: ${cartTotal.value} zł`)
+  alert(`Przejście do kasy.`)
   // TODO
 }
 
@@ -54,43 +53,14 @@ const proceedToCheckout = () => {
                   <span class="qty-value">{{ item.quantity || 1 }}</span>
                   <button @click="increaseQuantity(item)" class="qty-btn">+</button>
                 </div>
-                <div class="price-box">
-                  <span class="price-total">{{ (item.price * (item.quantity || 1)) }} zł</span>
-                </div>
+               
               </div>
             </div>
 
           </article>
         </div>
 
-        <aside class="cart-summary-sidebar">
-          <div class="summary-card">
-            <h3 class="summary-title">Podsumowanie</h3>
-            
-            <div class="summary-row">
-              <span>Suma częściowa</span>
-              <span>{{ cartTotal }} zł</span>
-            </div>
-            <div class="summary-row">
-              <span>Dostawa</span>
-              <span class="shipping-free">DARMOWA</span>
-            </div>
-
-            <div class="summary-divider"></div>
-
-            <div class="summary-row total-row">
-              <span>Razem </span>
-              <span class="final-price">{{ cartTotal }} zł</span>
-            </div>
-
-            <button @click="proceedToCheckout" class="btn-checkout">
-              <span>Przejdź do kasy</span>
-              <div class="btn-glow"></div>
-            </button>
-            
-          
-          </div>
-        </aside>
+       
 
       </div>
 

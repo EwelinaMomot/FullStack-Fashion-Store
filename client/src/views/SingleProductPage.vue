@@ -5,7 +5,10 @@ import Navbar from '@/components/navbar.vue'
 import { productService } from '@/services/ProductService'
 import { productCategoryService } from '@/services/ProductCategoriesService'
 import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'vue-router'
 
+
+const router = useRouter()
 const props = defineProps({
   productId: {
     type: String, 
@@ -65,6 +68,8 @@ const deleteProduct=async()=>{
   try{
     const response = await productService.deleteProduct(props.productId)
     alert("Pomyślnie usunięto produkt")
+    router.push("/")
+    
   }catch(e){alert(e)}
 }
 
