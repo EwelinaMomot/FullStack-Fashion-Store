@@ -263,17 +263,12 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
-
-
 .chrome-page-wrapper {
-  font-family: 'Outfit', sans-serif;
-  background: radial-gradient(circle at 50% 20%, #dcecfa 0%, #edf4fc 40%, #ffffff 100%);
+  background: radial-gradient(circle at 50% 20%, var(--color-gradient-start) 0%, var(--color-gradient-mid) 40%, var(--color-gradient-end) 100%);
   min-height: 100vh;
-  color: #3c4043;
+  color: var(--color-text);
   padding: 0 1.5rem 4rem;
   display: flex;
-  
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
@@ -379,29 +374,6 @@ onMounted(async () => {
 }
 
 
-.btn-chrome-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #ffffff;
-  color: #3c4043;
-  border: none;
-  padding: 1rem 2.5rem;
-  border-radius: 40px;
-  font-size: 1rem;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  box-shadow: 0 8px 24px rgba(160, 195, 235, 0.4);
-  transition: all 0.3s ease;
-  width: auto;
-}
-
-.btn-chrome-primary:hover {
-  box-shadow: 0 12px 32px rgba(160, 195, 235, 0.6);
-  transform: translateY(-2px);
-  color: #1a73e8; }
-
 .admin-panel-box {
   background: #ffffff;
   border-radius: 24px;
@@ -429,35 +401,6 @@ onMounted(async () => {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-}
-
-.btn-admin-edit, .btn-admin-delete {
-  padding: 0.6rem 1.25rem;
-  border-radius: 24px;
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: background 0.2s ease;
-}
-
-.btn-admin-edit {
-  background: #e8f0fe;
-  color: #1a73e8;
-}
-
-.btn-admin-edit:hover {
-  background: #d2e3fc;
-}
-
-.btn-admin-delete {
-  background: #fce8e6;
-  color: #d93025;
-}
-
-.btn-admin-delete:hover {
-  background: #fad2cf;
 }
 
 .modal-overlay {
@@ -534,34 +477,9 @@ onMounted(async () => {
 .form-label {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #5f6368;
+  color: var(--color-text-light);
   margin-bottom: 0.5rem;
   margin-left: 0.5rem;
-}
-
-.chrome-input {
-  width: 100%;
-  background: #f1f3f4;
-  border: 2px solid transparent;
-  color: #202124;
-  font-family: inherit;
-  font-size: 1rem;
-  padding: 0.9rem 1.2rem;
-  border-radius: 24px;
-  transition: all 0.2s ease;
-  appearance: none;
-  box-sizing: border-box;
-}
-
-.chrome-input:hover {
-  background: #e8eaed;
-}
-
-.chrome-input:focus {
-  outline: none;
-  background: #ffffff;
-  border-color: #1a73e8;
-  box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.15);
 }
 
 .chrome-textarea {

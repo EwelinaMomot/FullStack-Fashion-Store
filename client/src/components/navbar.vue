@@ -36,14 +36,10 @@ import { totalItemsCount } from '../store/cart'
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
-
 .chrome-navbar {
-  font-family: 'Outfit', sans-serif;
   background: transparent;
   padding: 2rem 0;
   width: 100%;
-  
 }
 
 .nav-container {

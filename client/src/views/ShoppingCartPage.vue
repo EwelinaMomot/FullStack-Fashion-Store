@@ -79,13 +79,10 @@ const proceedToCheckout = () => {
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
-
 .cart-page-wrapper {
-  font-family: 'Outfit', sans-serif;
-  background: radial-gradient(circle at 50% 20%, #dcecfa 0%, #edf4fc 40%, #ffffff 100%);
+  background: radial-gradient(circle at 50% 20%, var(--color-gradient-start) 0%, var(--color-gradient-mid) 40%, var(--color-gradient-end) 100%);
   min-height: 100vh;
-  color: #3c4043;
+  color: var(--color-text);
   padding: 0rem 1.5rem 4rem;
   display: flex;
   flex-direction: column;
