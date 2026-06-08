@@ -1,15 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { cartActions } from '@/store/cart'
 import Navbar from '@/components/navbar.vue'
-import Modal from '@/components/Modal.vue'
+import ProductAdminPanel from '@/components/ProductAdminPanel.vue'
+import ProductInfoDetails from '@/components/ProductInfoDetails.vue'
 import { productService } from '@/services/ProductService'
-import { productCategoryService } from '@/services/ProductCategoriesService'
-import { jwtDecode } from 'jwt-decode';
-import { useRouter } from 'vue-router'
+import { jwtDecode } from 'jwt-decode'
 
-
-const router = useRouter()
 const props = defineProps({
   productId: {
     type: String, 
@@ -18,99 +14,31 @@ const props = defineProps({
 })
 
 const product = ref(null)
-const isVisible = ref(false)
 const isAdmin = ref(false)
-const isEditModalOpen = ref(false)
-const availableCategories = ref([])
-const editFormData = ref({
-  title: '',
-  description: '',
-  imageUrl: '',
-  productCategoryIdList: []
-})
 
 const fetchProductData = async (id) => {
-  try{
-    const response = await  productService.getSingleProduct(id)
-    product.value= response
-
-  }catch(error){  alert("Nie udało się załadować produktu:", error)}
-}
-
-const checkUserRole= ()=>{
-  const token = localStorage.getItem('token')
-  if (token){
-    try {
-          const decodedPayload = jwtDecode(token);
-          
-          isAdmin.value = decodedPayload.role === 'Admin'; 
-        } catch (error) {
-          console.error("Nieprawidłowy token JWT", error);
-        }
-  }
-
-}
-
-const handleAddToCart =(product)=>{
-  cartActions.addToCart(product)
-}
-
-const fetchCategories = async () => {
   try {
-    const response = await productCategoryService.getAllCategories()
-    availableCategories.value = response.categories
-   
-  } catch (error) {
-    console.error('Błąd podczas pobierania kategorii:', error)
+    const response = await productService.getSingleProduct(id)
+    product.value = response
+  } catch(error) {
+    alert("Nie udało się załadować produktu:", error)
   }
 }
 
-const deleteProduct=async()=>{
-  try{
-    const response = await productService.deleteProduct(props.productId)
-    alert("Pomyślnie usunięto produkt")
-    router.push("/")
-    
-  }catch(e){alert(e)}
-}
-
-const openEditModal = async () => {
-  await fetchCategories()
-  editFormData.value = {
-    title: product.value.title,
-    description: product.value.description,
-    imageUrl: product.value.imageUrl || '',
-    productCategoryIdList: product.value.productCategoryIdList || []
-  }
-  isEditModalOpen.value = true
-
-}
-
-const saveEdit = async () => {
-  if (!editFormData.value.title) {
-    alert('Tytuł produktu jest wymagany!')
-    return
-  }
-  try{
-    const response = await productService.editProduct(props.productId, editFormData.value)
-    alert("Pomyślnie zaktualizowano produkt")
-    isEditModalOpen.value = false
-    await fetchProductData(props.productId)
-  }catch(e){
-    alert(e)
+const checkUserRole = () => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    try {
+      const decodedPayload = jwtDecode(token)
+      isAdmin.value = decodedPayload.role === 'Admin'
+    } catch (error) {
+      console.error("Nieprawidłowy token JWT", error)
+    }
   }
 }
 
-const closeEditModal = () => {
-  isEditModalOpen.value = false
-}
-
-
-const showWithTimeout = () => {
-  isVisible.value = true
-
-  let timeout = null;
-  timeout = setTimeout(()=>{isVisible.value=false},3000)
+const handleProductUpdated = async () => {
+  await fetchProductData(props.productId)
 }
 
 onMounted(async () => {
@@ -140,114 +68,17 @@ onMounted(async () => {
       </div>
 
       <div class="info-section">
-        <div class="categories-tags" v-if="product.productCategoryList && product.productCategoryList.length">
-          <span 
-            v-for="(category, index) in product.productCategoryList" 
-            :key="index" 
-            class="category-badge"
-          >
-            {{ category }}
-          </span>
-        </div>
+        <ProductInfoDetails 
+          :product="product" 
+          :productId="props.productId" 
+        />
 
-        <h1 class="product-title">{{ product.title }}</h1>
-        <div class="product-meta">
-          <span class="meta-item">ID: {{ props.productId }}</span>
-          <span v-if="product.creationDate" class="meta-item">
-            Dodano: {{ new Date(product.creationDate).toLocaleDateString() }}
-          </span>
-        </div>
-
-        <div class="divider-line"></div>
-
-        <div class="description-container">
-          <h3 class="section-subtitle">Opis</h3>
-          <p class="product-description">{{ product.description }}</p>
-        </div>
-
-        <div class="divider-line"></div>
-
-        <div class="actions-container">
-          <button class="btn-chrome-primary" @click="handleAddToCart(product),showWithTimeout()">
-            <span class="btn-text">Dodaj do koszyka</span>
-            <div class="btn-glow"></div>
-          </button>
-          
-        </div>
-        <span v-if="isVisible">Dodano do koszyka</span>
-
-        <div  v-if="isAdmin" class="admin-panel-box">
-          <h4 class="admin-title">Panel administratora</h4>
-          <p class="admin-desc">Jako administrator możesz trwale zaktualizować lub usunąć ten produkt ze stanów magazynowych.</p>
-          <div class="admin-actions">
-            <button class="btn-admin-edit" @click="openEditModal">Edytuj produkt</button>
-            <button class="btn-admin-delete" @click="deleteProduct">Usuń produkt</button>
-          </div>
-        </div>
-
-        <Modal 
-          :is-open="isEditModalOpen" 
-          title="Edytuj produkt"
-          :on-close="closeEditModal"
-          @submit="saveEdit"
-        >
-          <template #body>
-            <form @submit.prevent="saveEdit" class="edit-form">
-              <div class="form-group">
-                <label for="edit-title" class="form-label">Tytuł produktu</label>
-                <input 
-                  type="text" 
-                  id="edit-title" 
-                  v-model="editFormData.title" 
-                  placeholder="Nazwa produktu" 
-                  class="chrome-input" 
-                  required 
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-description" class="form-label">Opis</label>
-                <textarea 
-                  id="edit-description" 
-                  v-model="editFormData.description" 
-                  rows="4" 
-                  placeholder="Opis produktu..." 
-                  class="chrome-input chrome-textarea"
-                ></textarea>
-              </div>
-
-              <div class="form-group">
-                <label for="edit-imageUrl" class="form-label">URL zdjęcia</label>
-                <input 
-                  type="text" 
-                  id="edit-imageUrl" 
-                  v-model="editFormData.imageUrl" 
-                  placeholder="https://..." 
-                  class="chrome-input" 
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-categories" class="form-label">Kategorie</label>
-                <select 
-                  id="edit-categories" 
-                  v-model="editFormData.productCategoryIdList" 
-                  multiple 
-                  class="chrome-input" 
-                  style="height: auto; min-height: 100px;"
-                >
-                  <option v-for="category in availableCategories" :key="category.id" :value="category.id">
-                    {{ category.name }}
-                  </option>
-                </select>
-                <small style="color: #666; font-size: 0.8rem; margin-top: 4px; display: block;">
-                  Przytrzymaj klawisz <b>Ctrl</b> (Windows) lub <b>Cmd</b> (Mac), aby zaznaczyć wiele kategorii.
-                </small>
-              </div>
-            </form>
-          </template>
-        </Modal>
-
+        <ProductAdminPanel 
+          v-if="isAdmin" 
+          :productId="props.productId" 
+          :product="product" 
+          @product-updated="handleProductUpdated"
+        />
       </div>
     </div>
 
@@ -279,7 +110,6 @@ onMounted(async () => {
   margin-top: 2rem;
 }
 
-
 .chrome-card {
   background: #ffffff;
   border-radius: 32px;
@@ -289,7 +119,6 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-
   background: #f4f8fd; 
   transition: transform 0.3s ease;
 }
@@ -302,125 +131,10 @@ onMounted(async () => {
   max-height: 600px;
 }
 
-
 .info-section {
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-.categories-tags {
-  margin-bottom: 1rem;
-}
-
-
-.category-badge {
-  background: #e8f0fe;
-  color: #1a73e8;
-  padding: 0.4rem 1rem;
-  border-radius: 24px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  display: inline-block;
-  margin-right: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.product-title {
-  font-size: 2.5rem;
-  font-weight: 500;
-  color: #202124;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.2;
-}
-
-.product-meta {
-  display: flex;
-  gap: 1.5rem;
-  color: #5f6368;
-  font-size: 0.95rem;
-  font-weight: 300;
-  margin-bottom: 1.5rem;
-}
-
-.divider-line {
-  height: 1px;
-  background: rgba(160, 195, 235, 0.3);
-  width: 100%;
-  margin: 1.5rem 0;
-}
-
-.section-subtitle {
-  font-size: 1.25rem;
-  font-weight: 500;
-  color: #202124;
-  margin-bottom: 0.75rem;
-}
-
-.product-description {
-  font-weight: 300;
-  color: #5f6368;
-  line-height: 1.6;
-  font-size: 1rem;
-  margin: 0;
-}
-
-.actions-container {
-  margin-top: 1rem;
-}
-
-
-.admin-panel-box {
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 1.5rem;
-  box-shadow: 0 6px 20px rgba(175, 205, 240, 0.25);
-  margin-top: 3rem;
-  border: 1px solid rgba(160, 195, 235, 0.15);
-}
-
-.admin-title {
-  margin: 0 0 0.5rem 0;
-  font-weight: 500;
-  color: #202124;
-  font-size: 1.1rem;
-}
-
-.admin-desc {
-  font-weight: 300;
-  color: #5f6368;
-  font-size: 0.9rem;
-  margin-bottom: 1.25rem;
-}
-
-.admin-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-label {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--color-text-light);
-  margin-bottom: 0.5rem;
-  margin-left: 0.5rem;
-}
-
-.chrome-textarea {
-  resize: vertical;
-  font-family: inherit;
 }
 
 .loading-state {
@@ -431,15 +145,10 @@ onMounted(async () => {
   font-size: 1.1rem;
 }
 
-
 @media (max-width: 900px) {
   .product-container {
     grid-template-columns: 1fr;
     gap: 2rem;
-  }
-  
-  .product-title {
-    font-size: 2rem;
   }
 }
 </style>
