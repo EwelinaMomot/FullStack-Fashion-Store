@@ -9,6 +9,7 @@ import { productCategoryService } from '@/services/ProductCategoriesService'
 const products = ref([])
 const categories = ref([])
 const selectedCategoryId = ref('')
+const searchTerm = ref('')
 const pagination = ref({ currentPage: 1, totalPages: 0, totalProductsNumber: 0 })
 const pageSize = 3
 const pages = computed(() => Array.from({ length: pagination.value.totalPages }, (_, index) => index + 1))
@@ -25,7 +26,7 @@ const fetchCategories = async () => {
 const fetchProducts = async (page = 1) => {
   try {
     const categoryId = selectedCategoryId.value ? Number(selectedCategoryId.value) : undefined
-    const response = await productService.getProductList(page, pageSize, categoryId)
+    const response = await productService.getProductList(page, pageSize, categoryId, searchTerm.value)
     products.value = response.products
     pagination.value.currentPage = response.currentPage
     pagination.value.totalPages = response.totalPages
@@ -57,22 +58,36 @@ onMounted(() => {
           <h3 class="section-title">Wybrane produkty</h3>
 
           <div class="filter-row">
-            <label for="category-filter" class="filter-label">Filtr kategorii</label>
-            <select
-              id="category-filter"
-              v-model="selectedCategoryId"
-              @change="fetchProducts(1)"
-              class="chrome-input filter-select"
-            >
-              <option value="">Wszystkie kategorie</option>
-              <option
-                v-for="category in categories"
-                :key="category.id"
-                :value="category.id"
+            <div class="filter-search">
+              <label for="search-input" class="filter-label">Szukaj produktu</label>
+              <input
+                id="search-input"
+                type="text"
+                v-model="searchTerm"
+                @keyup.enter="fetchProducts(1)"
+                placeholder="Szukaj..."
+                class="chrome-input filter-input"
+              />
+            </div>
+
+            <div class="filter-category">
+              <label for="category-filter" class="filter-label">Filtr kategorii</label>
+              <select
+                id="category-filter"
+                v-model="selectedCategoryId"
+                @change="fetchProducts(1)"
+                class="chrome-input filter-select"
               >
-                {{ category.name }}
-              </option>
-            </select>
+                <option value="">Wszystkie kategorie</option>
+                <option
+                  v-for="category in categories"
+                  :key="category.id"
+                  :value="category.id"
+                >
+                  {{ category.name }}
+                </option>
+              </select>
+            </div>
           </div>
 
           <p v-if="products.length === 0" class="loading">Ładowanie produktów lub brak danych...</p>
@@ -197,10 +212,17 @@ onMounted(() => {
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: 0.25rem;
   width: auto;
-  max-width: 360px;
+  max-width: 640px;
   margin: 0 0 1.25rem auto;
+}
+
+.filter-search,
+.filter-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
 .filter-label {
@@ -209,6 +231,7 @@ onMounted(() => {
   font-weight: 600;
 }
 
+.filter-input,
 .filter-select {
   min-width: 200px;
   background: #ffffff;
@@ -216,6 +239,11 @@ onMounted(() => {
   color: #1a73e8;
   font-size: 0.9rem;
   padding: 0.6rem 0.9rem;
+}
+
+.filter-input {
+  width: 100%;
+  max-width: 260px;
 }
 
 .pagination {

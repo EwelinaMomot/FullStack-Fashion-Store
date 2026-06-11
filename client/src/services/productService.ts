@@ -21,11 +21,14 @@ axios.interceptors.request.use(
 
 export const productService={
 
-    async getProductList(page = 1, pageSize = 3, categoryId?: number): Promise<ProductListPageDto> {
+    async getProductList(page = 1, pageSize = 3, categoryId?: number, search?: string): Promise<ProductListPageDto> {
         try {
             let url = `${BASE_URL}?page=${page}&pageSize=${pageSize}`
             if (categoryId != null) {
                 url += `&categoryId=${categoryId}`
+            }
+            if (search && search.trim()) {
+                url += `&search=${encodeURIComponent(search.trim())}`
             }
 
             const response = await axios.get(url)
