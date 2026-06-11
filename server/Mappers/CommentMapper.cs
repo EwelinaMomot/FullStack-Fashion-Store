@@ -11,7 +11,8 @@ namespace server.Mappers
             {
                 Id = c.Id,
                 Description = c.Description,
-                CreationDate = c.CreationDate
+                CreationDate = c.CreationDate,
+                CreatorUserId=c.CreatorUserdId
             };
         }
 
@@ -22,7 +23,8 @@ namespace server.Mappers
                 Id = c.Id,
                 Description = c.Description,
                 ProductId = c.ProductId,
-                CreationDate = c.CreationDate
+                CreationDate = c.CreationDate,
+                CreatorUserdId=c.CreatorUserId
             };
         }
     }

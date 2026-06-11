@@ -15,10 +15,10 @@ namespace server.Endpoints
             var group = app.MapGroup("/api/products");
 
             // Pobieranie wszystkich produktów (nieusuniętych) z paginacją i wyszukiwaniem
-            group.MapGet("/", async (DataContext context, string? search= null, int? categoryId=null, int page =1,int pageSize=10) =>
+            group.MapGet("/", async (DataContext context, string? search= null, int? categoryId=null, int page =1,int pageSize=3) =>
             {
                 if (page <= 0) page = 1;
-                if (pageSize <= 0) pageSize = 10;
+                if (pageSize <= 0) pageSize = 3;
 
                 int skip =(page-1)*pageSize;
                 int totalProductsNumber =await context.Products.CountAsync(p => !p.IsDeleted);
@@ -56,7 +56,7 @@ namespace server.Endpoints
             // Pobieranie produktu po ID (nieusunięte)
             group.MapGet("/{id}", async (int id, DataContext context) =>
             {
-                Console.WriteLine("heeej");
+               
                 var product = await context.Products
                     .Include(p => p.ProductCategories)
                     .Include(p => p.Comments)

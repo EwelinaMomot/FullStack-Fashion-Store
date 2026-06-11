@@ -37,7 +37,8 @@ namespace server.Mappers
                 {
                     Id = c.Id,
                     Description = c.Description,
-                    CreationDate = c.CreationDate
+                    CreationDate = c.CreationDate,
+                    CreatorUserId=c.CreatorUserdId
                 }).ToList() ?? new List<CommentDto>()
             };
         }
