@@ -4,15 +4,28 @@ import { cartActions } from '@/store/cart'
 import Navbar from '@/components/navbar.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { productService } from '@/services/ProductService'
+import { productCategoryService } from '@/services/ProductCategoriesService'
 
 const products = ref([])
+const categories = ref([])
+const selectedCategoryId = ref('')
 const pagination = ref({ currentPage: 1, totalPages: 0, totalProductsNumber: 0 })
 const pageSize = 3
 const pages = computed(() => Array.from({ length: pagination.value.totalPages }, (_, index) => index + 1))
 
+const fetchCategories = async () => {
+  try {
+    const response = await productCategoryService.getAllCategories()
+    categories.value = response.categories ?? response
+  } catch (error) {
+    alert(error)
+  }
+}
+
 const fetchProducts = async (page = 1) => {
   try {
-    const response = await productService.getProductList(page, pageSize)
+    const categoryId = selectedCategoryId.value ? Number(selectedCategoryId.value) : undefined
+    const response = await productService.getProductList(page, pageSize, categoryId)
     products.value = response.products
     pagination.value.currentPage = response.currentPage
     pagination.value.totalPages = response.totalPages
@@ -22,10 +35,9 @@ const fetchProducts = async (page = 1) => {
   }
 }
 
-
 onMounted(() => {
+  fetchCategories()
   fetchProducts()
-  
 })
 </script>
 
@@ -43,6 +55,25 @@ onMounted(() => {
       <main class="container">
         <section id="products" class="products-section">
           <h3 class="section-title">Wybrane produkty</h3>
+
+          <div class="filter-row">
+            <label for="category-filter" class="filter-label">Filtr kategorii</label>
+            <select
+              id="category-filter"
+              v-model="selectedCategoryId"
+              @change="fetchProducts(1)"
+              class="chrome-input filter-select"
+            >
+              <option value="">Wszystkie kategorie</option>
+              <option
+                v-for="category in categories"
+                :key="category.id"
+                :value="category.id"
+              >
+                {{ category.name }}
+              </option>
+            </select>
+          </div>
 
           <p v-if="products.length === 0" class="loading">Ładowanie produktów lub brak danych...</p>
 
@@ -159,6 +190,32 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2.5rem;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  width: auto;
+  max-width: 360px;
+  margin: 0 0 1.25rem auto;
+}
+
+.filter-label {
+  font-size: 0.85rem;
+  color: #1a73e8;
+  font-weight: 600;
+}
+
+.filter-select {
+  min-width: 200px;
+  background: #ffffff;
+  border: 1px solid #1a73e8;
+  color: #1a73e8;
+  font-size: 0.9rem;
+  padding: 0.6rem 0.9rem;
 }
 
 .pagination {
