@@ -27,7 +27,13 @@ export interface ProductListDto {
     categoryId: number;
     creationDate: Date | null;
     creatorUserId: number;
+}
 
+export interface ProductListPageDto {
+    products: ProductListDto[];
+    totalProductsNumber: number;
+    currentPage: number;
+    totalPages: number;
 }
 
 export interface NewProductDto {

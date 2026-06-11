@@ -1,15 +1,22 @@
 <script setup>
-import { ref,onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { cartActions } from '@/store/cart'
 import Navbar from '@/components/navbar.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { productService } from '@/services/ProductService'
 
 const products = ref([])
-const fetchProducts = async () => {
-  try {
+const pagination = ref({ currentPage: 1, totalPages: 0, totalProductsNumber: 0 })
+const pageSize = 3
+const pages = computed(() => Array.from({ length: pagination.value.totalPages }, (_, index) => index + 1))
 
-    products.value = await productService.getProductList()
+const fetchProducts = async (page = 1) => {
+  try {
+    const response = await productService.getProductList(page, pageSize)
+    products.value = response.products
+    pagination.value.currentPage = response.currentPage
+    pagination.value.totalPages = response.totalPages
+    pagination.value.totalProductsNumber = response.totalProductsNumber
   } catch (error) {
     alert("Nie udało się załadować produktów:", error)
   }
@@ -47,6 +54,35 @@ onMounted(() => {
               :on-add-to-cart="cartActions.addToCart"
             />
           </div>
+
+          <div v-if="pagination.totalPages > 1" class="pagination">
+            <button
+              class="page-button"
+              :disabled="pagination.currentPage === 1"
+              @click="fetchProducts(pagination.currentPage - 1)"
+            >
+              Poprzednia
+            </button>
+
+            <button
+              v-for="page in pages"
+              :key="page"
+              :class="['page-button', { active: page === pagination.currentPage }]"
+              @click="fetchProducts(page)"
+            >
+              {{ page }}
+            </button>
+
+            <button
+              class="page-button"
+              :disabled="pagination.currentPage === pagination.totalPages"
+              @click="fetchProducts(pagination.currentPage + 1)"
+            >
+              Następna
+            </button>
+          </div>
+
+          <p class="pagination-summary">Strona {{ pagination.currentPage }} z {{ pagination.totalPages }} </p>
         </section>
       </main>
     </div>
@@ -123,5 +159,45 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2.5rem;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.page-button {
+  background: #ffffff;
+  color: #1a73e8;
+  border: 1px solid rgba(26, 115, 232, 0.25);
+  border-radius: 9999px;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-button:hover:not(:disabled) {
+  background: #e8f0fe;
+}
+
+.page-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-button.active {
+  background: #1a73e8;
+  color: #ffffff;
+  border-color: #1a73e8;
+}
+
+.pagination-summary {
+  text-align: center;
+  color: #5f6368;
+  font-size: 0.95rem;
+  margin-top: 1rem;
 }
 </style>
