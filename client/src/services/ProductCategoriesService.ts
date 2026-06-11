@@ -22,5 +22,25 @@ export const productCategoryService={
             console.log("Błąd podczas dodawania kategorii", e)
             throw(e)
         }
+    },
+
+    async deleteCategory(categoryId:number){
+        try{
+            const request = await axios.delete(`${BASE_URL}/${categoryId}`)
+            return request.data
+        }catch(e){
+            console.log("Błąd podczas usuwania kategorii", e)
+            throw(e)
+        }
+    },
+
+    async editCategory(categoryId:number, category:NewCategoryDTO){
+        try{
+           const request = await axios.put(`${BASE_URL}/${categoryId}`, category)
+            return request.data
+        }catch(e){
+            console.log("Błąd podczas edytowania kategorii", e)
+            throw(e)
+        }
     }
 }

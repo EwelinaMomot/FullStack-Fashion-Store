@@ -5,6 +5,7 @@ import { RouterLink } from 'vue-router'
 import Navbar from '@/components/navbar.vue'
 import AdminRoleManager from '@/components/AdminRoleManager.vue'
 import AdminProductForm from '@/components/AdminProductForm.vue'
+import AdminCategoryManager from '@/components/AdminCategoryManager.vue'
 
 const isAdmin = ref(false)
 const activeTab = ref('product')
@@ -53,11 +54,18 @@ onMounted(() => {
         >
           Zmień uprawnienia użytkownika
         </button>
+        <button
+          :class="['tab-button', { active: activeTab === 'categories' }]"
+          @click="selectTab('categories')"
+        >
+          Zarządzaj kategoriami
+        </button>
       </div>
 
       <div class="admin-tab-panel">
         <AdminProductForm v-if="activeTab === 'product'" />
-        <AdminRoleManager v-else />
+        <AdminRoleManager v-else-if="activeTab === 'users'" />
+        <AdminCategoryManager v-else-if="activeTab === 'categories'" />
       </div>
     </div>
 
