@@ -1,0 +1,43 @@
+﻿namespace server.DTOs
+{
+    public class ProductDetailDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string ImageUrl { get; set; }
+        public DateTime CreationDate { get; set; }
+
+        public int ProductCategoryId { get; set; }
+
+        public int CreatorUserId {get;set;}
+
+        public List<string> Categories { get; set; } = new();
+
+        public List<int> CategoriesIds { get; set; } = new();
+
+        public List<CommentDto> Comments { get; set; } = new();
+    }
+
+    public class ProductListDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string ImageUrl { get; set; }
+        public DateTime CreationDate { get; set; }
+
+        public int CreatorUserId { get; set; }
+
+    }
+
+    public class NewProductDto
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string ImageUrl { get; set; }
+
+        public List<int> productCategoryIdList { get; set; } = new();
+
+    }
+}

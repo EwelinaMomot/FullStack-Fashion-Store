@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using server.Data;
+using server.DTOs;
+using server.Mappers;
 using server.Models;
 
 namespace server.Endpoints
@@ -23,12 +25,14 @@ namespace server.Endpoints
                     .Where(c => !c.IsDeleted).Skip(skip).Take(pageSize)
                     .ToListAsync();
 
+                var categoriesDto = categories.Select(c => c.toCategoryDto()).ToList();
+
                 return Results.Ok(new
                 {
                     TotalCategoriesNumber = totalCategoriesNumber,
                     CurrentPage = page,
                     totalPages = (int)Math.Ceiling(totalCategoriesNumber / (double)pageSize),
-                    Categories = categories
+                    Categories = categoriesDto
                 });
             });
 
@@ -39,21 +43,23 @@ namespace server.Endpoints
                     .Include(c => c.Products)
                     .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
 
+                var categoryDto = category.toCategoryDto();
                 return category is not null
-                    ? Results.Ok(category)
+                    ? Results.Ok(categoryDto)
                     : Results.NotFound("Kategoria nie istnieje.");
             });
 
             // Dodaj nową kategorię
-            group.MapPost("/", async (ProductCategory category, DataContext context) =>
+            group.MapPost("/", async ( CategoryDto category, DataContext context) =>
             {
-                context.ProductCategories.Add(category);
+                var categoryModel = category.fromCategoryDto();
+                context.ProductCategories.Add(categoryModel);
                 await context.SaveChangesAsync();
                 return Results.Created($"/api/categories/{category.Id}", category);
             });
 
             // Aktualizuj kategorię (name)
-            group.MapPut("/{id}", async (int id, ProductCategory dto, DataContext context) =>
+            group.MapPut("/{id}", async (int id, CategoryDto dto, DataContext context) =>
             {
                 var category = await context.ProductCategories.FindAsync(id);
                 if (category is null || category.IsDeleted)

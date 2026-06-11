@@ -21,6 +21,11 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    //jeœli napotkasz zapêtlenie, po prostu je zignoruj i nie wchodŸ g³êbiej
+    options.SerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
 //zezwala na publiczny dostêp do endpointów
 builder.Services.AddCors(options =>
 {
