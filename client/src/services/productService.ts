@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {  ProductDetailDto,ProductListDto,NewProductDto } from '@/DTOs/ProductDto';
+import { ProductDetailDto, ProductListDto, ProductListPageDto, NewProductDto } from '@/DTOs/ProductDto';
 import {mapToProductListDto,mapToProductDto} from '@/mappers/ProductMapper'
 
 const BASE_URL='https://localhost:7154/api/products';
@@ -21,17 +21,30 @@ axios.interceptors.request.use(
 
 export const productService={
 
-    async getProductList(): Promise<ProductListDto[]>  {
-  try {
-    const response = await axios.get(BASE_URL)
-    const rawProducts = response.data.products;
+    async getProductList(page = 1, pageSize = 3, categoryId?: number, search?: string): Promise<ProductListPageDto> {
+        try {
+            let url = `${BASE_URL}?page=${page}&pageSize=${pageSize}`
+            if (categoryId != null) {
+                url += `&categoryId=${categoryId}`
+            }
+            if (search && search.trim()) {
+                url += `&search=${encodeURIComponent(search.trim())}`
+            }
 
-    return mapToProductListDto(rawProducts)
-   
-  } catch (error) {
-    console.error("Błąd w serwisie podczas pobierania produktów:", error);
-      throw("Błąd w serwisie podczas pobierania produktów");  }
-},
+            const response = await axios.get(url)
+
+            const rawProducts = response.data.Products ?? response.data.products ?? []
+            return {
+                products: mapToProductListDto(rawProducts),
+                totalProductsNumber: response.data.TotalProductsNumber ?? 0,
+                currentPage: response.data.CurrentPage ?? page,
+                totalPages: response.data.totalPages ?? 1
+            }
+        } catch (error) {
+            console.error("Błąd w serwisie podczas pobierania produktów:", error);
+            throw("Błąd w serwisie podczas pobierania produktów");
+        }
+    },
 
   async getSingleProduct( id: number): Promise<ProductDetailDto>  {
   try {

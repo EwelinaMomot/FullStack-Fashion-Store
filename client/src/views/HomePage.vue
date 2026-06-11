@@ -1,24 +1,44 @@
 <script setup>
-import { ref,onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { cartActions } from '@/store/cart'
 import Navbar from '@/components/navbar.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { productService } from '@/services/ProductService'
+import { productCategoryService } from '@/services/ProductCategoriesService'
 
 const products = ref([])
-const fetchProducts = async () => {
-  try {
+const categories = ref([])
+const selectedCategoryId = ref('')
+const searchTerm = ref('')
+const pagination = ref({ currentPage: 1, totalPages: 0, totalProductsNumber: 0 })
+const pageSize = 3
+const pages = computed(() => Array.from({ length: pagination.value.totalPages }, (_, index) => index + 1))
 
-    products.value = await productService.getProductList()
+const fetchCategories = async () => {
+  try {
+    const response = await productCategoryService.getAllCategories()
+    categories.value = response.categories ?? response
+  } catch (error) {
+    alert(error)
+  }
+}
+
+const fetchProducts = async (page = 1) => {
+  try {
+    const categoryId = selectedCategoryId.value ? Number(selectedCategoryId.value) : undefined
+    const response = await productService.getProductList(page, pageSize, categoryId, searchTerm.value)
+    products.value = response.products
+    pagination.value.currentPage = response.currentPage
+    pagination.value.totalPages = response.totalPages
+    pagination.value.totalProductsNumber = response.totalProductsNumber
   } catch (error) {
     alert("Nie udało się załadować produktów:", error)
   }
 }
 
-
 onMounted(() => {
+  fetchCategories()
   fetchProducts()
-  
 })
 </script>
 
@@ -37,6 +57,39 @@ onMounted(() => {
         <section id="products" class="products-section">
           <h3 class="section-title">Wybrane produkty</h3>
 
+          <div class="filter-row">
+            <div class="filter-search">
+              <label for="search-input" class="filter-label">Szukaj produktu</label>
+              <input
+                id="search-input"
+                type="text"
+                v-model="searchTerm"
+                @keyup.enter="fetchProducts(1)"
+                placeholder="Szukaj..."
+                class="chrome-input filter-input"
+              />
+            </div>
+
+            <div class="filter-category">
+              <label for="category-filter" class="filter-label">Filtr kategorii</label>
+              <select
+                id="category-filter"
+                v-model="selectedCategoryId"
+                @change="fetchProducts(1)"
+                class="chrome-input filter-select"
+              >
+                <option value="">Wszystkie kategorie</option>
+                <option
+                  v-for="category in categories"
+                  :key="category.id"
+                  :value="category.id"
+                >
+                  {{ category.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
           <p v-if="products.length === 0" class="loading">Ładowanie produktów lub brak danych...</p>
 
          <div v-else class="grid">
@@ -47,6 +100,35 @@ onMounted(() => {
               :on-add-to-cart="cartActions.addToCart"
             />
           </div>
+
+          <div v-if="pagination.totalPages > 1" class="pagination">
+            <button
+              class="page-button"
+              :disabled="pagination.currentPage === 1"
+              @click="fetchProducts(pagination.currentPage - 1)"
+            >
+              Poprzednia
+            </button>
+
+            <button
+              v-for="page in pages"
+              :key="page"
+              :class="['page-button', { active: page === pagination.currentPage }]"
+              @click="fetchProducts(page)"
+            >
+              {{ page }}
+            </button>
+
+            <button
+              class="page-button"
+              :disabled="pagination.currentPage === pagination.totalPages"
+              @click="fetchProducts(pagination.currentPage + 1)"
+            >
+              Następna
+            </button>
+          </div>
+
+          <p class="pagination-summary">Strona {{ pagination.currentPage }} z {{ pagination.totalPages }} </p>
         </section>
       </main>
     </div>
@@ -123,5 +205,84 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2.5rem;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  width: auto;
+  max-width: 640px;
+  margin: 0 0 1.25rem auto;
+}
+
+.filter-search,
+.filter-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.filter-label {
+  font-size: 0.85rem;
+  color: #1a73e8;
+  font-weight: 600;
+}
+
+.filter-input,
+.filter-select {
+  min-width: 200px;
+  background: #ffffff;
+  border: 1px solid #1a73e8;
+  color: #1a73e8;
+  font-size: 0.9rem;
+  padding: 0.6rem 0.9rem;
+}
+
+.filter-input {
+  width: 100%;
+  max-width: 260px;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.page-button {
+  background: #ffffff;
+  color: #1a73e8;
+  border: 1px solid rgba(26, 115, 232, 0.25);
+  border-radius: 9999px;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-button:hover:not(:disabled) {
+  background: #e8f0fe;
+}
+
+.page-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-button.active {
+  background: #1a73e8;
+  color: #ffffff;
+  border-color: #1a73e8;
+}
+
+.pagination-summary {
+  text-align: center;
+  color: #5f6368;
+  font-size: 0.95rem;
+  margin-top: 1rem;
 }
 </style>

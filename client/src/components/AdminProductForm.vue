@@ -2,15 +2,18 @@
 import { ref, onMounted } from 'vue'
 import { productService } from '@/services/ProductService'
 import { productCategoryService } from '@/services/ProductCategoriesService'
+import Modal from '@/components/Modal.vue'
 
 const newProduct = ref({
   title: '',
   description: '',
   imageUrl: '',
-  categories: [] 
+  productCategoryIdList: []
 })
 
 const availableCategories = ref([])
+const isAddCategoryModalOpen = ref(false)
+const newCategoryName = ref('')
 
 const fetchCategories = async () => {
   try {
@@ -27,16 +30,41 @@ const handleAddProduct = async() => {
     return
   }
   try {
-    const request = await productService.addProduct(newProduct.value)
+    await productService.addProduct(newProduct.value)
     alert(`Dodano produkt: ${newProduct.value.title}`)
     newProduct.value = {
       title: '',
       description: '',
       imageUrl: '',
-      categories: []
+      productCategoryIdList: []
     }
   } catch(e) {
     alert(e)
+  }
+}
+
+const openAddCategoryModal = () => {
+  newCategoryName.value = ''
+  isAddCategoryModalOpen.value = true
+}
+
+const closeAddCategoryModal = () => {
+  isAddCategoryModalOpen.value = false
+}
+
+const saveNewCategory = async () => {
+  if (!newCategoryName.value.trim()) {
+    alert('Nazwa kategorii jest wymagana!')
+    return
+  }
+
+  try {
+    await productCategoryService.addCategory({ name: newCategoryName.value.trim() })
+    alert(`Dodano nową kategorię: ${newCategoryName.value.trim()}`)
+    await fetchCategories()
+    closeAddCategoryModal()
+  } catch (error) {
+    alert(error)
   }
 }
 
@@ -49,10 +77,15 @@ onMounted(async () => {
   <section class="admin-card">
     <div class="card-icon-header">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-      <h2 class="card-title">Dodaj nowy produkt</h2>
+      <div>
+        <h2 class="card-title">Dodaj nowy produkt</h2>
+        <button type="button" class="btn-add-category" @click="openAddCategoryModal">
+          Dodaj nową kategorię
+        </button>
+      </div>
     </div>
 
-    <form @submit.prevent="handleAddProduct(); fetchCategories();" class="product-form">
+    <form @submit.prevent="handleAddProduct" class="product-form">
       
       <div class="form-group">
         <label for="title" class="form-label">Tytuł produktu</label>
@@ -71,7 +104,7 @@ onMounted(async () => {
 
       <div class="form-group">
         <label for="categories" class="form-label">Kategorie (możesz wybrać kilka :))</label>
-        <select id="categories" v-model="newProduct.categories" multiple class="chrome-input" style="height: auto; min-height: 100px;">
+        <select id="categories" v-model="newProduct.productCategoryIdList" multiple class="chrome-input" style="height: auto; min-height: 100px;">
           <option v-for="category in availableCategories" :key="category.id" :value="category.id">
             {{ category.name }}
           </option>
@@ -85,6 +118,29 @@ onMounted(async () => {
         Dodaj
       </button>
     </form>
+
+    <Modal
+      :is-open="isAddCategoryModalOpen"
+      title="Dodaj nową kategorię"
+      :on-close="closeAddCategoryModal"
+      submitButtonText="Dodaj kategorię"
+      cancelButtonText="Anuluj"
+      @submit="saveNewCategory"
+    >
+      <template #body>
+        <div class="form-group">
+          <label for="new-category-name" class="form-label">Nazwa kategorii</label>
+          <input
+            type="text"
+            id="new-category-name"
+            v-model="newCategoryName"
+            placeholder="np. Akcesoria"
+            class="chrome-input"
+            required
+          />
+        </div>
+      </template>
+    </Modal>
   </section>
 </template>
 
@@ -122,6 +178,23 @@ onMounted(async () => {
   font-weight: 500;
   color: #202124;
   margin: 0;
+}
+
+.btn-add-category {
+  margin-top: 0.75rem;
+  display: inline-flex;
+  background: #ffffff;
+  border: 1px solid #1a73e8;
+  color: #1a73e8;
+  padding: 0.7rem 1rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-add-category:hover {
+  background: #e8f0fe;
 }
 
 .product-form {

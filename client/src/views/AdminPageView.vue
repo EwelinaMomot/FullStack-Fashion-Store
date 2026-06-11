@@ -5,8 +5,10 @@ import { RouterLink } from 'vue-router'
 import Navbar from '@/components/navbar.vue'
 import AdminRoleManager from '@/components/AdminRoleManager.vue'
 import AdminProductForm from '@/components/AdminProductForm.vue'
+import AdminCategoryManager from '@/components/AdminCategoryManager.vue'
 
 const isAdmin = ref(false)
+const activeTab = ref('product')
 
 const checkUserRole = () => {
   const token = localStorage.getItem('token')
@@ -18,6 +20,10 @@ const checkUserRole = () => {
       console.error("Nieprawidłowy token JWT", error)
     }
   }
+}
+
+const selectTab = (tab) => {
+  activeTab.value = tab
 }
 
 onMounted(() => {
@@ -35,9 +41,31 @@ onMounted(() => {
         <p class="page-subtitle">Zarządzaj uprawnieniami i asortymentem sklepu.</p>
       </header>
 
-      <div class="admin-grid">
-        <AdminRoleManager />
-        <AdminProductForm />
+      <div class="admin-tabs">
+        <button
+          :class="['tab-button', { active: activeTab === 'product' }]"
+          @click="selectTab('product')"
+        >
+          Dodaj nowy produkt
+        </button>
+        <button
+          :class="['tab-button', { active: activeTab === 'users' }]"
+          @click="selectTab('users')"
+        >
+          Zmień uprawnienia użytkownika
+        </button>
+        <button
+          :class="['tab-button', { active: activeTab === 'categories' }]"
+          @click="selectTab('categories')"
+        >
+          Zarządzaj kategoriami
+        </button>
+      </div>
+
+      <div class="admin-tab-panel">
+        <AdminProductForm v-if="activeTab === 'product'" />
+        <AdminRoleManager v-else-if="activeTab === 'users'" />
+        <AdminCategoryManager v-else-if="activeTab === 'categories'" />
       </div>
     </div>
 
@@ -94,6 +122,40 @@ onMounted(() => {
   color: #5f6368;
   font-size: 1.1rem;
   margin: 0;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  border: 1px solid rgba(26, 115, 232, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  color: #1a73e8;
+  padding: 0.9rem 1.6rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.tab-button:hover {
+  transform: translateY(-1px);
+  background: #e8f0fe;
+}
+
+.tab-button.active {
+  background: #1a73e8;
+  color: #ffffff;
+  border-color: #1a73e8;
+}
+
+.admin-tab-panel {
+  width: 100%;
 }
 
 .admin-grid {
